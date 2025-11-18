@@ -1,10 +1,21 @@
 import React from 'react'
 import "./App.css";
 import NavBar from './Components/NavBar.jsx'
+import Dashboard from "./Pages/Dashboard.jsx";
+import Map from "./Pages/Map.jsx";
+import MainPage from './Pages/MainPage.jsx';
+import { Routes, Route } from 'react-router-dom';
 
 
 export default function App() {
   return (
-    <NavBar />
+    <div className="bg-white-100">
+      <NavBar />
+      <Routes>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/map" element={<Map />} />
+      </Routes>
+    </div>
   );
 }

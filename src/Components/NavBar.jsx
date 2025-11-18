@@ -1,5 +1,5 @@
 import React from "react";
-
+import { Link } from "react-router-dom";
 
 export default function NavBar() {
   return (
@@ -8,14 +8,20 @@ export default function NavBar() {
         <div className="text-2xl font-bold">
           FleetPulse
         </div>
-
         <div className="space-x-4">
-          <a href="#" className="hover:underline">
+          <Link
+            to="/dashboard"
+            className="hover:underline"
+          >
             Dashboard
-          </a>
-          <a href="#" className="hover:underline">
+          </Link>
+
+          <Link
+            to="/map"
+            className="hover:underline"
+          >
             Map
-          </a>
+          </Link>
         </div>
       </div>
     </nav>
