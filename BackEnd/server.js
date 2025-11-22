@@ -1,14 +1,14 @@
 /**
  * server.js - The main entry point for your Node.js Backend
  */
-
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config(); // Load environment variables from .env file
+import express from 'express';
+import cors from 'cors'
 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+export default app;
 
 
 // CORS allows your frontend (e.g., React runing on port 5173) to talk to this backend
