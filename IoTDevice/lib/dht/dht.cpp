@@ -5,6 +5,10 @@
 
 DHT20 dht;
 
+const float celsiusToFahrenheit(const float celsius) {
+    return (celsius * 9.0 / 5.0) + 32.0;
+}
+
 void setupDHT() {
     Wire.begin();                               // Starts the wire used for the I2C communication with the humidity/temperature sensor
     dht.begin();                                // Initializes the DHT20 sensor object and prepares it for humidity/temperature readings
@@ -21,5 +25,5 @@ const DHTData requestDHTData() {
         Serial.println("Failed to read from DHT sensor");
         return DHTData();
     }
-    return DHTData(temperature, humidity);
+    return DHTData(celsiusToFahrenheit(temperature), humidity);
 }

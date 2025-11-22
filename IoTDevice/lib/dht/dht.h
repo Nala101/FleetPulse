@@ -8,6 +8,8 @@ struct DHTData {
     DHTData(const float& temperature, const float& humidity) : temperature(temperature), humidity(humidity) {}
 };
 
+const float celsiusToFahrenheit(const float celsius);
+
 void setupDHT();
 
 const DHTData requestDHTData();
