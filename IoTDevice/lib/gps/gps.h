@@ -1,28 +1,23 @@
-// #ifndef _GPS_H
-// #define _GPS_H
+#ifndef _GPS_H
+#define _GPS_H
 
-// #include <Arduino.h>					// Includes the Arduino library for standard Arduino functions
-// #include <Adafruit_GPS.h>				// Includes the Adafruit_GPS library
-// #include <SoftwareSerial.h>				// Includes the SoftwareSerial library for using software UART communication
+#define RX_PIN 32                       // connect to GPS TX
+#define TX_PIN 33                       // connect to GPS RX
+#define GPS_BAUD 9600
+#define NMEA_MSG_LEN 256
 
-// #define GPS_TX 16
-// #define GPS_RX 17
-// #define GPS_BAUD_RATE 9600
-// #define GPS_TIMEOUT_MS 30000
+struct GPSData {
+    const bool fix;
+    const int satellites;
+    const float latitude;
+    const float longitude;
+    GPSData() : fix(false), satellites(0), latitude(0.0f), longitude(0.0f) {}
+    GPSData(const bool fix, const int satellites, const float latitude, const float longitude) 
+            : fix(fix), satellites(satellites), latitude(latitude), longitude(longitude) {}
+};
 
-// struct GPSData {
-//     const bool fix;
-//     const int satellites;
-//     const float latitude;
-//     const float longitude;
-//     GPSData(const bool fix, const int satellites, const float latitude, const float longitude) 
-//             : fix(fix), satellites(satellites), latitude(latitude), longitude(longitude) {}
-// };
+void setupGPS();
 
-// void clearGPSBuffer();
+const GPSData requestGPSData();
 
-// void setupGPS();
-
-// const GPSData requestGPSData();
-
-// #endif /* _GPS_H */
+#endif /* _GPS_H */
