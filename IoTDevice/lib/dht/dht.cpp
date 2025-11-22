@@ -13,13 +13,13 @@ void setupDHT() {
 const DHTData requestDHTData() {
     if (dht.read() != DHT20_OK) {
         Serial.println("Failed to read from DHT sensor");
-        return DHTData(0, 0);
+        return DHTData();
     }
     float temperature = dht.getTemperature();
     float humidity = dht.getHumidity();
     if (isnan(temperature) || isnan(humidity)) {
         Serial.println("Failed to read from DHT sensor");
-        return DHTData(0, 0);
+        return DHTData();
     }
     return DHTData(temperature, humidity);
 }

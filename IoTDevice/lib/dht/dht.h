@@ -4,7 +4,8 @@
 struct DHTData {
     const float temperature;
     const float humidity;
-    DHTData(const float& temperature, const float& humidity) : temperature(temperature), humidity(humidity) {} 
+    DHTData() : temperature(0), humidity(0) {}
+    DHTData(const float& temperature, const float& humidity) : temperature(temperature), humidity(humidity) {}
 };
 
 void setupDHT();
