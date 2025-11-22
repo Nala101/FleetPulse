@@ -3,6 +3,7 @@
  */
 
 // just removed the type script stuff and turned it back into normal js
+// used this github https://github.com/googlemaps-samples/codelab-maps-platform-101-react-js/tree/main
 
 import {
   forwardRef,

@@ -5,6 +5,8 @@
 
 
 // just removed the type script stuff and turned it back into normal js
+// used this example https://github.com/googlemaps-samples/codelab-maps-platform-101-react-js/tree/main
+
 
 import React, {
   useEffect,
@@ -13,9 +15,6 @@ import React, {
   useCallback,
 } from "react";
 import { createRoot } from "react-dom/client";
-
-
-
 
 import {
   APIProvider,
