@@ -1,7 +1,6 @@
 #include "obd.h"
 #include "dht.h"
 #include <Arduino.h>
-#include <SoftwareSerial.h>
 
 #define RX_PIN 26
 #define TX_PIN 25
@@ -9,7 +8,7 @@
 long lastMPHReadingTimestamp;
 long lastGPHReadingTimestamp;
 
-SoftwareSerial obdSerial(RX_PIN, TX_PIN);
+HardwareSerial obdSerial(1);
 
 char* trimResponse(char* buf) {
 	for (int i = 0; i < 2; ++i) {
@@ -19,6 +18,9 @@ char* trimResponse(char* buf) {
 			}
 		}
 		++buf;
+		if (*buf == '\0') {
+			return nullptr;
+		}
 	}
 	return buf;
 }
@@ -37,15 +39,15 @@ char* getResponse(const char* command, char* buf) {
     int index = 0;
     long start = millis();
 
-    while (millis() - start < 10000) {
+    while (millis() - start < 1000) {
         if (obdSerial.available()) {
             char c = obdSerial.read();
 
             if (c == '>') {
                 buf[index] = '\0';
-				// Serial.println(buf);
 				char* response = trimResponse(buf);
-				Serial.println(response);
+				if (!response)
+					Serial.printf("Response: %s\n", response);
                 return response;
             }
 
@@ -55,14 +57,17 @@ char* getResponse(const char* command, char* buf) {
         }
     }
     buf[index] = '\0';
-	Serial.println(buf);
-    return trimResponse(buf);
+	char* response = trimResponse(buf);
+	if (response)
+		Serial.printf("Response: %s\n", response);
+    return response;
 }
 
 void setupOBD() {
 	lastMPHReadingTimestamp = millis();
 	lastGPHReadingTimestamp = millis();
-	obdSerial.begin(OBD_BAUD);
+	// obdSerial.begin(OBD_BAUD);
+	obdSerial.begin(OBD_BAUD, SERIAL_8N1, RX_PIN, TX_PIN);
 	static const char* commands[] = {"ATZ", "ATE0", "ATL0", "ATH0"};
 	for (char i = 0; i < 4; ++i) {
 		const char* command = commands[i];
@@ -83,56 +88,49 @@ const OBDData requestOBDData() {
 	float engineTemp = 0;
 
 	response = getResponse("010D", buf);
-	if (response == nullptr) {
+	if (!response) {
 		Serial.println("Error reading data");
 
 	}
 	else {
 		mph = strtol(&response[0], nullptr, 16) * 0.621371;
-		Serial.printf("%.2f mph\n", mph);
-		milesTraveled = mph * ((millis() - lastMPHReadingTimestamp) / 3600);
-		Serial.printf("%.10f mi\n", milesTraveled);
+		milesTraveled = mph * ((millis() - lastMPHReadingTimestamp) / 3600000.0f);
 		lastMPHReadingTimestamp = millis();
 	}
 
 	response = getResponse("010C", buf);
-	if (response == nullptr) {
+	if (!response) {
 		Serial.println("Error reading data");
 	}
 	else {
 		rpm = ((strtol(&response[0], nullptr, 16) * 256) + strtol(&response[3], nullptr, 16)) / 4;
-		Serial.printf("%.2f rpm\n", rpm);
 	}
 
 	response = getResponse("012F", buf);
-	if (response == nullptr) {
+	if (!response) {
 		Serial.println("Error reading data");
 	}
 	else {
 		fuelPercent = (strtol(&response[0], nullptr, 16) * 100.0f) / 255.0f;
-		Serial.printf("%.2f %%\n", fuelPercent);
 	}
 
 	response = getResponse("0110", buf);
-	if (response == nullptr) {
+	if (!response) {
 		Serial.println("Error reading data");
 	}
 	else {
 		float mafGPS = (((strtol(&response[0], nullptr, 16) * 256) + strtol(&response[3], nullptr, 16)) / 100.0f);
 		galPerHour = (mafGPS / AFR) * 3600.0f / DENSITY_G_PER_GAL;
-		Serial.printf("%.2f gal/h\n", galPerHour);
 		galUsed = galPerHour * ((millis() - lastGPHReadingTimestamp) / 3600000.0f);
-		Serial.printf("%.10f gal\n", galUsed);
 		lastGPHReadingTimestamp = millis();
 	}
 
 	response = getResponse("0105", buf);
-	if (response == nullptr) {
+	if (!response) {
 		Serial.println("Error reading data");
 	}
 	else {
-		engineTemp = strtol(&response[0], nullptr, 16) - 40;
-		Serial.printf("%.2f F\n", celsiusToFahrenheit(engineTemp));
+		engineTemp = celsiusToFahrenheit(strtol(&response[0], nullptr, 16) - 40);
 	}
 
 	return OBDData(mph, milesTraveled, rpm, fuelPercent, galPerHour, galUsed, engineTemp);
