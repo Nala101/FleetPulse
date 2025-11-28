@@ -27,6 +27,7 @@ import {
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
 
 import { Circle } from "../components/circle";
+import StatsMenu from "../Components/StatsMenu";
 
 // Plain JS array of POIs
 const locations = [
@@ -56,40 +57,48 @@ const locations = [
 
 export default function MapPage(){
   return (
-    <div
-      style={{ width: "100%", height: "100vh" }}
-    >
-      <APIProvider
-        apiKey={
-          import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-        }
-        onLoad={() =>
-          console.log("Maps API loaded")
-        }
+    <div className="flex flex-row">
+      <div
+        style={{ width: "100%", height: "100vh" }}
       >
-        <Map
-          defaultZoom={13}
-          defaultCenter={{
-            lat: -33.860664,
-            lng: 151.208138,
-          }}
-          onCameraChanged={(ev) =>
-            console.log(
-              "camera changed:",
-              ev.detail.center,
-              "zoom:",
-              ev.detail.zoom
-            )
+        <APIProvider
+          apiKey={
+            import.meta.env
+              .VITE_GOOGLE_MAPS_API_KEY
           }
-          mapId="da37f3254c6a6d1c"
-          style={{
-            width: "100%",
-            height: "100%",
-          }}
+          onLoad={() =>
+            console.log("Maps API loaded")
+          }
         >
-          <PoiMarkers pois={locations} />
-        </Map>
-      </APIProvider>
+          <Map
+            defaultZoom={13}
+            defaultCenter={{
+              lat: -33.860664,
+              lng: 151.208138,
+            }}
+            onCameraChanged={(ev) =>
+              console.log(
+                "camera changed:",
+                ev.detail.center,
+                "zoom:",
+                ev.detail.zoom
+              )
+            }
+            mapId="da37f3254c6a6d1c"
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            <PoiMarkers pois={locations} />
+          </Map>
+        </APIProvider>
+      </div>
+
+      <div>
+          <StatsMenu />
+
+      </div>
     </div>
   );
 }
