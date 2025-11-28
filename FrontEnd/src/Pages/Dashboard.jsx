@@ -28,7 +28,7 @@ export default function Dashboard() {
       </div>
     );
 
-  let stats = data.stats;
+  const stats = data.stats;
 
   return (
     <div className="flex flex-row">

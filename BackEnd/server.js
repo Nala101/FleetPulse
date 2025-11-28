@@ -5,6 +5,7 @@ import express from "express";
 import cors from "cors";
 
 import { getData } from "./sql_connection.js";
+import { get24Data } from "./sql_connection.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,6 +52,40 @@ app.get("/api/car-status", async (req, res) => {
         Rpm: 0,
         Fuel: 0,
         Tempurature: 0,
+      },
+      timestamp: new Date(),
+      status: "success",
+    });
+  }
+});
+
+
+// API Route (GET): Fetch data
+app.get("/api/car-24-status", async (req, res) => {
+  if (!DEBUG) {
+    const data = await get24Data();
+    if (!rows) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ error: "Database error" });
+    } else {
+      res.json({
+        stats: {
+          AvgSpeed: data.AvgSpeed,
+          AvgRPM: data.AvgRPM,
+          TopSpeed: data.TopSpeed,
+        },
+        timestamp: new Date(),
+        status: "success",
+      });
+    }
+  } else {
+    res.json({
+      stats: {
+        AvgSpeed: 0,
+        AvgRPM: 0,
+        TopSpeed: 0,
       },
       timestamp: new Date(),
       status: "success",
