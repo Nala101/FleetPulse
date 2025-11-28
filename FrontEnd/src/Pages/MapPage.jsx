@@ -28,6 +28,13 @@ import { MarkerClusterer } from "@googlemaps/markerclusterer";
 
 import { Circle } from "../components/circle";
 import StatsMenu from "../Components/StatsMenu";
+import ErrorNotification from "../Components/ErrorNotification";
+import useSWR from "swr";
+
+
+
+const fetcher = (...args) =>
+  fetch(...args).then((res) => res.json());
 
 // Plain JS array of POIs
 const locations = [
@@ -56,6 +63,7 @@ const locations = [
 ];
 
 export default function MapPage(){
+
   return (
     <div className="flex flex-row">
       <div
