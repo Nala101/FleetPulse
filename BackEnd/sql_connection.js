@@ -2,6 +2,7 @@ import sql from "mssql";
 import dotenv from "dotenv";
 dotenv.config();
 
+const DEBUG = true;
 
 const config = {
   user: process.env.DB_USER,
@@ -19,8 +20,10 @@ const config = {
   },
 };
 
-const pool = new sql.ConnectionPool(config);
-const poolConnect = pool.connect();
+if (!DEBUG) {
+  const pool = new sql.ConnectionPool(config);
+  const poolConnect = pool.connect();
+}
 
 export async function getData(row_num) {
   try {

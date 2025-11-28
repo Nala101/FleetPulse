@@ -8,6 +8,7 @@ import { getData } from "./sql_connection.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const DEBUG = true;
 
 export default app;
 
@@ -24,19 +25,32 @@ app.get("/", (req, res) => {
 
 // API Route (GET): Fetch data
 app.get("/api/car-status", async (req, res) => {
-  const data = await getData(1);
-  if (!rows) {
-    console.error(err);
-    res
-      .status(500)
-      .json({ error: "Database error" });
+  if (!DEBUG) {
+    const data = await getData(1);
+    if (!rows) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ error: "Database error" });
+    } else {
+      res.json({
+        stats: {
+          Speed: data.Speed,
+          Rpm: data.Rpm,
+          Fuel: data.Fuel,
+          Tempurature: data.Tempurature,
+        },
+        timestamp: new Date(),
+        status: "success",
+      });
+    }
   } else {
     res.json({
       stats: {
-        Speed: data.Speed,
-        Rpm: data.Rpm,
-        Fuel: data.Fuel,
-        Tempurature: data.Tempurature,
+        Speed: 0,
+        Rpm: 0,
+        Fuel: 0,
+        Tempurature: 0,
       },
       timestamp: new Date(),
       status: "success",
