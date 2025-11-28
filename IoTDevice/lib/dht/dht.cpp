@@ -5,7 +5,7 @@
 
 DHT20 dht;
 
-const float celsiusToFahrenheit(const float celsius) {
+const float celsiusToFahrenheit(const float& celsius) {
     return (celsius * 9.0 / 5.0) + 32.0;
 }
 
