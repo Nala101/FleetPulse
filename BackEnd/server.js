@@ -13,6 +13,10 @@ const DEBUG = true;
 
 export default app;
 
+
+
+
+
 // CORS allows your frontend (e.g., React runing on port 5173) to talk to this backend
 app.use(cors());
 
@@ -23,6 +27,7 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Connected");
 });
+
 
 // API Route (GET): Fetch data
 app.get("/api/car-status", async (req, res) => {
@@ -35,7 +40,7 @@ app.get("/api/car-status", async (req, res) => {
         .json({ error: "Database error" });
     } else {
       res.json({
-        stats: {
+        info: {
           Speed: data.Speed,
           Rpm: data.Rpm,
           Fuel: data.Fuel,
@@ -47,7 +52,7 @@ app.get("/api/car-status", async (req, res) => {
     }
   } else {
     res.json({
-      stats: {
+      info: {
         Speed: 0,
         Rpm: 0,
         Fuel: 0,
@@ -71,7 +76,7 @@ app.get("/api/car-24-status", async (req, res) => {
         .json({ error: "Database error" });
     } else {
       res.json({
-        stats: {
+        info: {
           AvgSpeed: data.AvgSpeed,
           AvgRPM: data.AvgRPM,
           TopSpeed: data.TopSpeed,
@@ -82,11 +87,67 @@ app.get("/api/car-24-status", async (req, res) => {
     }
   } else {
     res.json({
-      stats: {
+      info: {
         AvgSpeed: 0,
         AvgRPM: 0,
         TopSpeed: 0,
       },
+      timestamp: new Date(),
+      status: "success",
+    });
+  }
+});
+
+
+
+// API Route (GET): Fetch data
+app.get("/api/loction-data", async (req, res) => {
+  if (!DEBUG) {
+    const data = await getLocationData();
+    if (!rows) {
+      console.error(err);
+      res
+        .status(500)
+        .json({ error: "Database error" });
+    } else {
+      res.json({
+        info: {
+          AvgSpeed: data.AvgSpeed,
+          AvgRPM: data.AvgRPM,
+          TopSpeed: data.TopSpeed,
+        },
+        timestamp: new Date(),
+        status: "success",
+      });
+    }
+  } else {
+    // Plain JS array of POIs
+    const locations = [
+      {
+        key: "botanicGardens",
+        location: {
+          lat: -33.864167,
+          lng: 151.216387,
+        },
+      },
+      {
+        key: "museumOfSydney",
+        location: {
+          lat: -33.8636005,
+          lng: 151.2092542,
+        },
+      },
+      {
+        key: "maritimeMuseum",
+        location: {
+          lat: -33.869395,
+          lng: 151.198648,
+        },
+      },
+    ];
+
+    res.json({
+      stats: locations, // locations is an array of json 
       timestamp: new Date(),
       status: "success",
     });
@@ -109,3 +170,4 @@ app.listen(PORT, () => {
     `---------------------------------------`
   );
 });
+

@@ -30,7 +30,7 @@ export default function StatsMenu(){
       </div>
     );
 
-  const stats = data.stats;
+  const stats = data.info;
 
   return (
     <div className="py-4 px-3">

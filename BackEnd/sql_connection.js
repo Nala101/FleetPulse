@@ -62,3 +62,19 @@ export async function get24Data() {
     return null;
   }
 }
+
+export async function getLocationData() {
+  try {
+    // ensure connected before querying
+    await poolConnect;
+    const result = await pool
+      .request()
+      .input("n", sql.Int, row_num)
+      .query("");
+
+    return result.recordset; // array of objects (rows)
+  } catch (err) {
+    console.error("DB ERROR:", err);
+    return null;
+  }
+}

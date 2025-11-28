@@ -36,33 +36,36 @@ import useSWR from "swr";
 const fetcher = (...args) =>
   fetch(...args).then((res) => res.json());
 
-// Plain JS array of POIs
-const locations = [
- 
-  {
-    key: "botanicGardens",
-    location: {
-      lat: -33.864167,
-      lng: 151.216387,
-    },
-  },
-  {
-    key: "museumOfSydney",
-    location: {
-      lat: -33.8636005,
-      lng: 151.2092542,
-    },
-  },
-  {
-    key: "maritimeMuseum",
-    location: {
-      lat: -33.869395,
-      lng: 151.198648,
-    },
-  }
-];
-
 export default function MapPage(){
+
+  const { data, error, isLoading } = useSWR(
+    "http://localhost:3000/api/car-status",
+    fetcher,
+    { refreshInterval: 1000 } // 3. Configuration: Auto-fetch every 1000ms (1s)
+  );
+
+  if (error)
+    return (
+      <div>
+        <ErrorNotification message="Error 500: Unable to connect to database" />
+      </div>
+    );
+
+  if (isLoading)
+    return (
+      <div>
+        <ErrorNotification message="loading dashboard" />
+      </div>
+    );
+
+
+    // makes sure locations is an array cuz if not it will break the google maps,
+    // since it could load before it finishes connecting to the back end, so it wil just default to 
+    // empty array if it is not an array yet
+const locations = Array.isArray(data?.info)
+  ? data.info
+  : [];
+
 
   return (
     <div className="flex flex-row">
