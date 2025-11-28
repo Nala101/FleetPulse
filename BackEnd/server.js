@@ -6,6 +6,7 @@ import cors from "cors";
 
 import { getData } from "./sql_connection.js";
 import { get24Data } from "./sql_connection.js";
+import { getLocationData } from "./sql_connection.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,7 +34,7 @@ app.get("/", (req, res) => {
 app.get("/api/car-status", async (req, res) => {
   if (!DEBUG) {
     const data = await getData(1);
-    if (!rows) {
+    if (!data) {
       console.error(err);
       res
         .status(500)
@@ -69,7 +70,7 @@ app.get("/api/car-status", async (req, res) => {
 app.get("/api/car-24-status", async (req, res) => {
   if (!DEBUG) {
     const data = await get24Data();
-    if (!rows) {
+    if (!data) {
       console.error(err);
       res
         .status(500)
@@ -101,21 +102,17 @@ app.get("/api/car-24-status", async (req, res) => {
 
 
 // API Route (GET): Fetch data
-app.get("/api/loction-data", async (req, res) => {
+app.get("/api/location-data", async (req, res) => {
   if (!DEBUG) {
     const data = await getLocationData();
-    if (!rows) {
+    if (!data) {
       console.error(err);
       res
         .status(500)
         .json({ error: "Database error" });
     } else {
       res.json({
-        info: {
-          AvgSpeed: data.AvgSpeed,
-          AvgRPM: data.AvgRPM,
-          TopSpeed: data.TopSpeed,
-        },
+        info: data,
         timestamp: new Date(),
         status: "success",
       });
@@ -147,7 +144,7 @@ app.get("/api/loction-data", async (req, res) => {
     ];
 
     res.json({
-      stats: locations, // locations is an array of json 
+      info: locations,
       timestamp: new Date(),
       status: "success",
     });

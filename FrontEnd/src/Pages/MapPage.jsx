@@ -14,7 +14,6 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import { createRoot } from "react-dom/client";
 
 import {
   APIProvider,
@@ -39,7 +38,7 @@ const fetcher = (...args) =>
 export default function MapPage(){
 
   const { data, error, isLoading } = useSWR(
-    "http://localhost:3000/api/car-status",
+    "http://localhost:3000/api/location-data",
     fetcher,
     { refreshInterval: 1000 } // 3. Configuration: Auto-fetch every 1000ms (1s)
   );
@@ -113,19 +112,6 @@ const locations = Array.isArray(data?.info)
     </div>
   );
 }
-
-
-
-const calculateDirections = async() => {
-  if (locations.length > 1){
-    const directionService = new window.google.maps.DirectionService()
-  }
-
-
-}
-
-
-
 
 const PoiMarkers = ({ pois }) => {
   const map = useMap();
