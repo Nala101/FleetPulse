@@ -20,13 +20,18 @@ app.use(express.json());
 
 // Root Route: Simple check to see if server is alive
 app.get('/', (req, res) => {
-    res.send('Welcome to the Node.js Backend!');
+    res.send('Connected');
 });
 
 // API Route (GET): Fetch data
-app.get('/api/hello', (req, res) => {
+app.get('/api/car-status', (req, res) => {
     res.json({
-        message: "Hello from the server!",
+        stats: {
+          "Speed" : 0,
+          "Rpm" : 0,
+          "Fuel" : 0,
+          "Tempurature" :0
+        },
         timestamp: new Date(),
         status: "success"
     });
