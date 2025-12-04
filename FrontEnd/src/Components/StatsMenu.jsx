@@ -16,30 +16,25 @@ const fetcher = async (...args) => {
 };
 
 
-export default function StatsMenu(){
+/*
+Here is the sql query for reference 
+SELECT
+      MAX(msg.mph) as 'TopSpeed',
+      AVG(msg.mph) as 'AvgSpeed',
+      AVG(msg.CabinTemperature) as 'AvgCabinTemp',
+      AVG(msg.CabinHumidity) as 'AvgCabinHumidity',
+      AVG(msg.EngineTemp) as 'AvgEngineTemp',
+      SUM(msg.MilesTraveled) as 'TtlMilesTraveled',
+      SUM(msg.MilesTraveled)/SUM(msg.GalUsed) as 'AvgMPG'
+      FROM dbo.Msg as msg
+      WHERE msg.UploadTime > DATEADD(HOUR, -96, GETDATE())
 
-     const { data, error, isLoading } = useSWR(
-    "http://localhost:3000/api/car-24-status",
-    fetcher,
-    { refreshInterval: 1000 } // 3. Configuration: Auto-fetch every 1000ms (1s)
-  );
+*/
 
-  if (error)
-    return (
-      <div>
-        <ErrorNotification message="Error 500: Unable to connect to database" />
-      </div>
-    );
 
-  if (isLoading)
-    return (
-      <div>
-        <ErrorNotification message="loading dashboard" />
-      </div>
-    );
+export default function StatsMenu({data}){
 
   const stats = data.info;
-
   return (
     <div className="py-4 px-3">
       <div className="flex flex-col bg-surface-600 rounded-md mx-auto shadow-2xl p">
@@ -56,10 +51,19 @@ export default function StatsMenu(){
           AVG Cabin Temps: {stats.AvgCabinTemp} F
         </div>
         <div className="text-lg text-neutral-50 text-left p-4">
-          AVG Engine Temps: {stats.AvgEngineTemp} F
+          AVG Engine Temps: {stats.AvgEngineTemp}{" "}
+          F
         </div>
         <div className="text-lg text-neutral-50 text-left p-4">
-          Total Miles Traveled: {stats.TotalMiles} Miles
+          Total Miles Traveled:{" "}
+          {stats.TtlMilesTraveled} Miles
+        </div>
+        <div className="text-lg text-neutral-50 text-left p-4">
+          AVG MPG: {stats.AvgMPG} Gallons Per Mile
+        </div>
+        <div className="text-lg text-neutral-50 text-left p-4">
+          AVG CabinHumidity:{" "}
+          {stats.AvgCabinHumidity}%
         </div>
       </div>
     </div>
