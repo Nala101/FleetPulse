@@ -14,7 +14,6 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import { createRoot } from "react-dom/client";
 
 import {
   APIProvider,
@@ -27,85 +26,92 @@ import {
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
 
 import { Circle } from "../components/circle";
+import StatsMenu from "../Components/StatsMenu";
+import ErrorNotification from "../Components/ErrorNotification";
+import useSWR from "swr";
 
-// Plain JS array of POIs
-const locations = [
- 
-  {
-    key: "botanicGardens",
-    location: {
-      lat: -33.864167,
-      lng: 151.216387,
-    },
-  },
-  {
-    key: "museumOfSydney",
-    location: {
-      lat: -33.8636005,
-      lng: 151.2092542,
-    },
-  },
-  {
-    key: "maritimeMuseum",
-    location: {
-      lat: -33.869395,
-      lng: 151.198648,
-    },
-  }
-];
+
+
+const fetcher = (...args) =>
+  fetch(...args).then((res) => res.json());
 
 export default function MapPage(){
+
+  const { data, error, isLoading } = useSWR(
+    "http://localhost:3000/api/location-data",
+    fetcher,
+    { refreshInterval: 1000 } // 3. Configuration: Auto-fetch every 1000ms (1s)
+  );
+
+  if (error)
+    return (
+      <div>
+        <ErrorNotification message="Error 500: Unable to connect to database" />
+      </div>
+    );
+
+  if (isLoading)
+    return (
+      <div>
+        <ErrorNotification message="loading dashboard" />
+      </div>
+    );
+
+
+    // makes sure locations is an array cuz if not it will break the google maps,
+    // since it could load before it finishes connecting to the back end, so it wil just default to 
+    // empty array if it is not an array yet
+const locations = Array.isArray(data?.info)
+  ? data.info
+  : [];
+
+
   return (
-    <div
-      style={{ width: "100%", height: "100vh" }}
-    >
-      <APIProvider
-        apiKey={
-          import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-        }
-        onLoad={() =>
-          console.log("Maps API loaded")
-        }
+    <div className="flex flex-row">
+      <div
+        style={{ width: "100%", height: "100vh" }}
       >
-        <Map
-          defaultZoom={13}
-          defaultCenter={{
-            lat: -33.860664,
-            lng: 151.208138,
-          }}
-          onCameraChanged={(ev) =>
-            console.log(
-              "camera changed:",
-              ev.detail.center,
-              "zoom:",
-              ev.detail.zoom
-            )
+        <APIProvider
+          apiKey={
+            import.meta.env
+              .VITE_GOOGLE_MAPS_API_KEY
           }
-          mapId="da37f3254c6a6d1c"
-          style={{
-            width: "100%",
-            height: "100%",
-          }}
+          onLoad={() =>
+            console.log("Maps API loaded")
+          }
         >
-          <PoiMarkers pois={locations} />
-        </Map>
-      </APIProvider>
+          <Map
+            defaultZoom={13}
+            defaultCenter={{
+              lat: -33.860664,
+              lng: 151.208138,
+            }}
+            onCameraChanged={(ev) =>
+              console.log(
+                "camera changed:",
+                ev.detail.center,
+                "zoom:",
+                ev.detail.zoom
+              )
+            }
+            mapId="da37f3254c6a6d1c"
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            <PoiMarkers pois={locations} />
+          </Map>
+        </APIProvider>
+      </div>
+
+      <div>
+          <StatsMenu />
+
+      </div>
     </div>
   );
 }
-
-
-
-const calculateDirections = async() => {
-  if (locations.length > 1){
-    const directionService = new window.google.maps.DirectionService()
-  }
-
-
-}
-
-
-
 
 const PoiMarkers = ({ pois }) => {
   const map = useMap();
