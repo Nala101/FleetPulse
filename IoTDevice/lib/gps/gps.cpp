@@ -9,7 +9,6 @@ static QueueHandle_t nmeaMsgQueue = NULL;
 TaskHandle_t nmeaMsgReaderTaskHandle = NULL;
 TaskHandle_t nmeaMsgParserTaskHandle = NULL;
 
-
 volatile bool fix = false;
 volatile int satellites = 0;
 volatile float latitude = 0.0f;
@@ -55,7 +54,7 @@ void nmeaMsgParserTask(void* parameters) {
 }
 
 void setupGPS() {
-    gpsSerial.begin(GPS_BAUD, SERIAL_8N1, RX_PIN, TX_PIN);
+    gpsSerial.begin(GPS_BAUD, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
     GPS.begin(GPS_BAUD);
 
     GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
@@ -67,8 +66,8 @@ void setupGPS() {
         return;
     }
 
-    xTaskCreatePinnedToCore(nmeaMsgReaderTask, "nmeaMsgReader", 1536, NULL, 2, &nmeaMsgReaderTaskHandle, 1);
-    xTaskCreatePinnedToCore(nmeaMsgParserTask, "nmeaMsgParser", 2048, NULL, 2, &nmeaMsgParserTaskHandle, 1);
+    xTaskCreatePinnedToCore(nmeaMsgReaderTask, "nmeaMsgReader", 1536, NULL, 2, &nmeaMsgReaderTaskHandle, 0);
+    xTaskCreatePinnedToCore(nmeaMsgParserTask, "nmeaMsgParser", 2048, NULL, 2, &nmeaMsgParserTaskHandle, 0);
 }
 
 // Returns latest GPS data snapshot
