@@ -6,7 +6,7 @@
 #define OBD_BAUD 9600
 #define OBD_MSG_LEN 20
 #define AFR 14.7f
-#define DENSITY_G_PER_GAL 7480.0f
+#define DENSITY_G_PER_GAL 2820.0f
 
 struct OBDData {
     const float mph;
