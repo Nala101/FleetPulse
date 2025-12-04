@@ -2,9 +2,6 @@
 #include "dht.h"
 #include <Arduino.h>
 
-#define RX_PIN 26
-#define TX_PIN 25
-
 long lastMPHReadingTimestamp;
 long lastGPHReadingTimestamp;
 
@@ -66,8 +63,7 @@ char* getResponse(const char* command, char* buf) {
 void setupOBD() {
 	lastMPHReadingTimestamp = millis();
 	lastGPHReadingTimestamp = millis();
-	// obdSerial.begin(OBD_BAUD);
-	obdSerial.begin(OBD_BAUD, SERIAL_8N1, RX_PIN, TX_PIN);
+	obdSerial.begin(OBD_BAUD, SERIAL_8N1, OBD_RX_PIN, OBD_TX_PIN);
 	static const char* commands[] = {"ATZ", "ATE0", "ATL0", "ATH0"};
 	for (char i = 0; i < 4; ++i) {
 		const char* command = commands[i];
