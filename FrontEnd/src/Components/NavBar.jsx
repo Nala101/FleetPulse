@@ -13,14 +13,20 @@ export default function NavBar() {
             to="/dashboard"
             className="hover:underline"
           >
-            Dashboard
+            Live Dashboard
           </Link>
 
           <Link
             to="/map"
             className="hover:underline"
           >
-            Map
+            24 Hour History
+          </Link>
+          <Link
+            to="/routes"
+            className="hover:underline"
+          >
+            Routes
           </Link>
         </div>
       </div>
