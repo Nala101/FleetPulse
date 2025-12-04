@@ -4,8 +4,16 @@ import ErrorNotification from "../Components/ErrorNotification";
 import useSWR from "swr";
 import StatsMenu from "../Components/StatsMenu";
 
-const fetcher = (...args) =>
-  fetch(...args).then((res) => res.json());
+const fetcher = async (...args) => {
+  const res = await fetch(...args);
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(`Request failed: ${res.status}`);
+    err.info = json;
+    throw err;
+  }
+  return json;
+};
 
 export default function Dashboard() {
   const { data, error, isLoading } = useSWR(

@@ -5,24 +5,19 @@ import express from "express";
 import cors from "cors";
 
 import { getData } from "./sql_connection.js";
-import { get24Data } from "./sql_connection.js";
 import { getLocationData } from "./sql_connection.js";
-
+import { get24HourAverages } from "./sql_connection.js";
 const app = express();
-const PORT = process.env.PORT || 3000;
-const DEBUG = true;
 
-export default app;
-
-
-
-
-
-// CORS allows your frontend (e.g., React runing on port 5173) to talk to this backend
+// CORS and JSON middleware
 app.use(cors());
-
-// Built-in middleware to parse JSON bodies (replaces body-parser)
 app.use(express.json());
+
+const PORT = process.env.PORT || 3000;
+const DEBUG = process.env.DEBUG === "true" || false;
+
+// export for tests
+export default app;
 
 // Root Route: Simple check to see if server is alive
 app.get("/", (req, res) => {
@@ -30,22 +25,21 @@ app.get("/", (req, res) => {
 });
 
 
-// API Route (GET): Fetch data
+// API Route (GET): Fetch latest car status
 app.get("/api/car-status", async (req, res) => {
   if (!DEBUG) {
     const data = await getData(1);
     if (!data) {
-      console.error(err);
       res
         .status(500)
         .json({ error: "Database error" });
     } else {
       res.json({
         info: {
-          Speed: data.Speed,
+          Speed: data.Mph,
           Rpm: data.Rpm,
-          Fuel: data.Fuel,
-          Tempurature: data.Tempurature,
+          Fuel: data.FuelPercent,
+          Tempurature: data.EngineTemp,
         },
         timestamp: new Date(),
         status: "success",
@@ -66,57 +60,96 @@ app.get("/api/car-status", async (req, res) => {
 });
 
 
-// API Route (GET): Fetch data
-app.get("/api/car-24-status", async (req, res) => {
-  if (!DEBUG) {
-    const data = await get24Data();
-    if (!data) {
-      console.error(err);
-      res
-        .status(500)
-        .json({ error: "Database error" });
+// API Route (GET): Fetch 
+  "/api/car-24-status",
+  async (req, res) => {
+    if (!DEBUG) {
+      try {
+        const data = await get24HourAverages(); // <-- use your new stats function
+
+        if (!data) {
+          return res
+            .status(500)
+            .json({ error: "Database error" });
+        }
+
+        res.json({
+          info: {
+            TopSpeed: data.TopSpeed,
+            AvgSpeed: data.AvgSpeed,
+            AvgCabinTemp: data.AvgCabinTemp,
+            AvgEngineTemp: data.AvgEngineTemp,
+            TotalMiles: data.TotalMiles,
+          },
+          timestamp: new Date(),
+          status: "success",
+        });
+      } catch (err) {
+        console.error(
+          "API ERROR (/api/car-24-status):",
+          err
+        );
+        res
+          .status(500)
+          .json({ error: "Server error" });
+      }
     } else {
+      // DEBUG MODE → return mock data
       res.json({
         info: {
-          AvgSpeed: data.AvgSpeed,
-          AvgRPM: data.AvgRPM,
-          TopSpeed: data.TopSpeed,
+          TopSpeed: 0,
+          AvgSpeed: 0,
+          AvgCabinTemp: 0,
+          AvgEngineTemp: 0,
+          TotalMiles: 0,
         },
         timestamp: new Date(),
         status: "success",
       });
     }
-  } else {
-    res.json({
-      info: {
-        AvgSpeed: 0,
-        AvgRPM: 0,
-        TopSpeed: 0,
-      },
-      timestamp: new Date(),
-      status: "success",
-    });
   }
-});
+
+
 
 
 
 // API Route (GET): Fetch data
 app.get("/api/location-data", async (req, res) => {
   if (!DEBUG) {
-    const data = await getLocationData();
-    if (!data) {
-      console.error(err);
-      res
-        .status(500)
-        .json({ error: "Database error" });
-    } else {
+    try {
+      const rows = await getLocationData();
+      if (!rows) {
+        console.error("DB: no rows returned for /api/location-data", { rows });
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      // Transform DB rows to the shape MapPage expects: { key, location: { lat, lng } }
+      const pois = rows
+        .map((r, i) => {
+          const lat = Number(r.Latitude ?? r.lat ?? r.Lat ?? r.latitude);
+          const lng = Number(r.Longitude ?? r.lng ?? r.Lon ?? r.lon ?? r.longitude);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+          return {
+            key: r.MsgID ? `msg-${r.MsgID}` : `row-${i}`,
+            location: { lat, lng },
+          };
+        })
+        .filter(Boolean);
+
       res.json({
-        info: data,
+        info: pois,
         timestamp: new Date(),
         status: "success",
       });
-    }
+    }catch (err) {
+        console.error(
+          "API ERROR (/api/car-24-status):",
+          err
+        );
+        res
+          .status(500)
+          .json({ error: "Server error" });
+      }
   } else {
     // Plain JS array of POIs
     const locations = [

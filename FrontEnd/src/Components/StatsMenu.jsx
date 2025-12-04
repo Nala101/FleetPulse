@@ -4,8 +4,16 @@ import useSWR from "swr";
 
 
 
-const fetcher = (...args) =>
-  fetch(...args).then((res) => res.json());
+const fetcher = async (...args) => {
+  const res = await fetch(...args);
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(`Request failed: ${res.status}`);
+    err.info = json;
+    throw err;
+  }
+  return json;
+};
 
 
 export default function StatsMenu(){
@@ -39,13 +47,19 @@ export default function StatsMenu(){
           24 Hr Avg Car Stats
         </div>
         <div className="text-lg text-neutral-50 text-left p-4">
-          AVG Speed: {stats.AvgSpeed} MPH
-        </div>
-        <div className="text-lg text-neutral-50 text-left p-4">
           Top Speed: {stats.TopSpeed} MPH
         </div>
         <div className="text-lg text-neutral-50 text-left p-4">
-          AVG RMP: {stats.AvgRPM} RPM
+          AVG Speed: {stats.AvgSpeed} MPH
+        </div>
+        <div className="text-lg text-neutral-50 text-left p-4">
+          AVG Cabin Temps: {stats.AvgCabinTemp} F
+        </div>
+        <div className="text-lg text-neutral-50 text-left p-4">
+          AVG Engine Temps: {stats.AvgEngineTemp} F
+        </div>
+        <div className="text-lg text-neutral-50 text-left p-4">
+          Total Miles Traveled: {stats.TotalMiles} Miles
         </div>
       </div>
     </div>
