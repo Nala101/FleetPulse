@@ -43,7 +43,58 @@ const fetcher = async (...args) => {
   return json;
 };
 
+
+
+export function MapWindow({locations}){
+
+  return (
+    <div className="flex flex-row">
+      <div
+        style={{ width: "100%", height: "100vh" }}
+      >
+        <APIProvider
+          apiKey={
+            import.meta.env
+              .VITE_GOOGLE_MAPS_API_KEY
+          }
+          onLoad={() =>
+            console.log("Maps API loaded")
+          }
+        >
+          <Map
+            defaultZoom={6}
+            defaultCenter={{
+              lat: 36.7783,
+              lng: -119.4179,
+            }}
+            onCameraChanged={(ev) =>
+              console.log(
+                "camera changed:",
+                ev.detail.center,
+                "zoom:",
+                ev.detail.zoom
+              )
+            }
+            mapId="da37f3254c6a6d1c"
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            console.log(locations);
+            <PoiMarkers pois={locations} />
+          </Map>
+        </APIProvider>
+      </div>
+    </div>
+  );
+
+
+}
+
+
 export default function MapPage(){
+
 
   const { data, error, isLoading } = useSWR(
     "http://localhost:3000/api/location-data",
@@ -65,61 +116,22 @@ export default function MapPage(){
       </div>
     );
 
+  // makes sure locations is an array cuz if not it will break the google maps,
+  // since it could load before it finishes connecting to the back end, so it wil just default to
+  // empty array if it is not an array yet
+  const locations = Array.isArray(data?.info)
+    ? data.info
+    : [];
 
-    // makes sure locations is an array cuz if not it will break the google maps,
-    // since it could load before it finishes connecting to the back end, so it wil just default to 
-    // empty array if it is not an array yet
-const locations = Array.isArray(data?.info)
-  ? data.info
-  : [];
 
-
-  return (
-    <div className="flex flex-row">
-      <div
-        style={{ width: "100%", height: "100vh" }}
-      >
-        <APIProvider
-          apiKey={
-            import.meta.env
-              .VITE_GOOGLE_MAPS_API_KEY
-          }
-          onLoad={() =>
-            console.log("Maps API loaded")
-          }
-        >
-          <Map
-            defaultZoom={13}
-            defaultCenter={{
-              lat: -33.860664,
-              lng: 151.208138,
-            }}
-            onCameraChanged={(ev) =>
-              console.log(
-                "camera changed:",
-                ev.detail.center,
-                "zoom:",
-                ev.detail.zoom
-              )
-            }
-            mapId="da37f3254c6a6d1c"
-            style={{
-              width: "100%",
-              height: "100%",
-            }}
-          >
-            <PoiMarkers pois={locations} />
-          </Map>
-        </APIProvider>
-      </div>
-
-      <div>
-          <StatsMenu />
-
-      </div>
-    </div>
-  );
+ return(
+   <div>
+     <MapWindow locations={locations}/>
+      <StatsMenu />
+   </div>
+ );
 }
+
 
 const PoiMarkers = ({ pois }) => {
   const map = useMap();

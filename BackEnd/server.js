@@ -28,6 +28,7 @@ app.get("/", (req, res) => {
 // API Route (GET): Fetch latest car status
 app.get("/api/car-status", async (req, res) => {
   if (!DEBUG) {
+    console.log("Sending Car-Status Query")
     const data = await getData(1);
     if (!data) {
       res
@@ -40,6 +41,8 @@ app.get("/api/car-status", async (req, res) => {
           Rpm: data.Rpm,
           Fuel: data.FuelPercent,
           Tempurature: data.EngineTemp,
+          latitude: data.Latitude,
+          longitude: data.Longitude
         },
         timestamp: new Date(),
         status: "success",
@@ -52,6 +55,8 @@ app.get("/api/car-status", async (req, res) => {
         Rpm: 0,
         Fuel: 0,
         Tempurature: 0,
+        latitude: 0,
+        longitude: 0,
       },
       timestamp: new Date(),
       status: "success",
@@ -65,6 +70,10 @@ app.get("/api/car-status", async (req, res) => {
   async (req, res) => {
     if (!DEBUG) {
       try {
+          console.log(
+            "Sending car-24-status Query"
+          );
+
         const data = await get24HourAverages(); // <-- use your new stats function
 
         if (!data) {
@@ -117,6 +126,8 @@ app.get("/api/car-status", async (req, res) => {
 app.get("/api/location-data", async (req, res) => {
   if (!DEBUG) {
     try {
+      console.log("Sending location-data Query");
+
       const rows = await getLocationData();
       if (!rows) {
         console.error("DB: no rows returned for /api/location-data", { rows });

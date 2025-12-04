@@ -3,6 +3,8 @@ import InfoCard from "../Components/InfoCard";
 import ErrorNotification from "../Components/ErrorNotification";
 import useSWR from "swr";
 import StatsMenu from "../Components/StatsMenu";
+import MapCard from "../Components/MapCard";
+
 
 const fetcher = async (...args) => {
   const res = await fetch(...args);
@@ -22,6 +24,7 @@ export default function Dashboard() {
     { refreshInterval: 1000 } // 3. Configuration: Auto-fetch every 1000ms (1s)
   );
 
+  // error hadning for when it connects to the database 
   if (error)
     return (
       <div>
@@ -37,29 +40,42 @@ export default function Dashboard() {
     );
 
   const stats = data.info;
-
+  const locations = [
+    {
+      key: "LastLocation",
+      location: {
+        lat: stats.latitude,
+        lng: stats.longitude,
+      },
+    },
+  ];
   return (
-    <div className="flex flex-row">
-      <div className="flex flex-wrap gap-4 p-4 justify-center">
-        <InfoCard
-          title="Speed"
-          content={stats.Speed + " MPH"}
-        />
-        <InfoCard
-          title="RPM"
-          content={stats.Rpm + " RPM"}
-        />
-        <InfoCard
-          title="Fuel Level"
-          content={stats.Fuel + " %"}
-        />
-        <InfoCard
-          title="Cabin Temp"
-          content={stats.Tempurature + "°F"}
-        />
+    <div className="flex flex-col">
+      <div className="flex flex-row">
+        <div className="flex flex-wrap gap-4 p-4 justify-center">
+          <InfoCard
+            title="Speed"
+            content={stats.Speed + " MPH"}
+          />
+          <InfoCard
+            title="RPM"
+            content={stats.Rpm + " RPM"}
+          />
+          <InfoCard
+            title="Fuel Level"
+            content={stats.Fuel + " %"}
+          />
+          <InfoCard
+            title="Cabin Temp"
+            content={stats.Tempurature + "°F"}
+          />
+        </div>
       </div>
+
       <div>
-        <StatsMenu />
+        <MapCard
+          location={locations}
+        />
       </div>
     </div>
   );

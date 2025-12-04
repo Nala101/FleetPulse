@@ -42,12 +42,12 @@ export async function getData(row_num) {
     const result = await pool
       .request()
       .input("n", sql.Int, row_num).query(`
-      SELECT TOP (@n) *
-      FROM Msg
-      ORDER BY UploadTime DESC
+      SELECT TOP 1 *
+      FROM dbo.Msg as msg
+      ORDER BY msg.UploadTime DESC
     `);
-
-    return result.recordset; // array of objects (rows)
+    console.log(result.recordset[0])
+    return result.recordset[0]; // array of objects (rows)
   } catch (err) {
     console.error("DB ERROR:", err);
     return null;
