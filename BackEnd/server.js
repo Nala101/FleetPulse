@@ -7,6 +7,7 @@ import cors from "cors";
 import { getData } from "./sql_connection.js";
 import { getLocationData } from "./sql_connection.js";
 import { get24HourAverages } from "./sql_connection.js";
+import { getRouteData } from "./sql_connection.js";
 const app = express();
 
 // CORS and JSON middleware
@@ -187,36 +188,16 @@ app.get("/api/location-data", async (req, res) => {
   }
 });
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send("Error");
-});
-
-app.listen(PORT, () => {
-  console.log(
-    `---------------------------------------`
-  );
-  console.log(
-    `Server running on http://localhost:${PORT}`
-  );
-  console.log(
-    `---------------------------------------`
-  );
-});
-
-
-
-
 
 
 
 // API Route (GET): Fetch data
-app.get("/api/location-data", async (req, res) => {
+app.get("/api/routes-locations", async (req, res) => {
   if (!DEBUG) {
     try {
-      console.log("Sending location-data Query");
+      console.log("Sending routes location Query");
 
-      const rows = await getLocationData();
+      const rows = await getRouteLocations();
       if (!rows) {
         console.error("DB: no rows returned for /api/location-data", { rows });
         return res.status(500).json({ error: "Database error" });
@@ -283,6 +264,52 @@ app.get("/api/location-data", async (req, res) => {
   }
 });
 
+
+
+
+// API Route (GET): Fetch
+app.get("/api/routes-data",  async (req, res) => {
+    if (DEBUG) {
+      // DEBUG MODE → return mock data
+      return res.json({
+        info: {
+          TopSpeed: 0,
+          AvgSpeed: 0,
+          AvgCabinTemp: 0,
+          AvgEngineTemp: 0,
+          TotalMiles: 0,
+        },
+        timestamp: new Date(),
+        status: "success",
+      });
+    }
+
+    // 2. Production Mode
+    try {
+      console.log("Sending routes Query");
+
+      const data = await getRouteData(); // <-- use your new stats function
+
+      if (!data) {
+        return res
+          .status(500)
+          .json({ error: "Database error" });
+      }
+      console.log("server data", data);
+      res.json({data});
+    } catch (err) {
+      console.error(
+        "API ERROR (/api/routes-status):",
+        err
+      );
+      res
+        .status(500)
+        .json({ error: "Server error" });
+    }
+  }
+); 
+
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send("Error");
@@ -299,5 +326,8 @@ app.listen(PORT, () => {
     `---------------------------------------`
   );
 });
+
+
+
 
 

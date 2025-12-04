@@ -48,7 +48,7 @@ export default function RoutesPage(){
 
 
   const { data, error, isLoading } = useSWR(
-    "http://localhost:3000/api/Routes-data",
+    "http://localhost:3000/api/location-data",
     fetcher,
     { refreshInterval: 1000 } // 3. Configuration: Auto-fetch every 1000ms (1s)
   );
@@ -164,3 +164,50 @@ const PoiMarkers = ({ pois }) => {
     </>
   );
 };
+
+
+function Menu(){
+  const { data, error, isLoading } = useSWR(
+    "http://localhost:3000/api/routes-data",
+    fetcher,
+    { refreshInterval: 1000 } // 3. Configuration: Auto-fetch every 1000ms (1s)
+  );
+
+  if (error)
+    return (
+      <div>
+        <ErrorNotification message="Error 500: Unable to connect to database" />
+      </div>
+    );
+
+  if (isLoading)
+    return (
+      <div>
+        <ErrorNotification message="loading dashboard" />
+      </div>
+    );
+
+  // Safely access the inner data 
+  // The ?. check prevents crashing if data is null during loading
+  const routes = data?.data;
+  const menuItems = [];
+
+  if (routes && Array.isArray(routes)) {
+    for (let i = 0; i < routes.length; i++) {
+      console.log(routes[i]);
+      menuItems.push(
+        <StatsMenu
+          key={i} // 3. IMPORTANT: React needs a unique 'key' for lists
+          data={{ info: routes[i] }}
+          title={"Route " + routes[i].PeriodGroup}
+        />
+      );
+    }
+  }
+  console.log(menuItems);
+  return (
+    <div className="flex flex-row">
+      {menuItems}
+    </div>
+  );
+}

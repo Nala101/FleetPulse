@@ -139,11 +139,9 @@ SELECT
 FROM Groups
 GROUP BY Groups.PeriodGroup
 ORDER BY StartTime
-
-
     `);
 
-    return result.recordset[0];
+    return result.recordset;
   } catch (err) {
     console.error("DB ERROR:", err);
     return null;

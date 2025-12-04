@@ -32,14 +32,14 @@ SELECT
 */
 
 
-export default function StatsMenu({data}){
+export default function StatsMenu({data, title}){
 
   const stats = data.info;
   return (
     <div className="py-4 px-3">
       <div className="flex flex-col bg-surface-600 rounded-md mx-auto shadow-2xl p">
         <div className="text-lg bg-primary-500 rounded-md shadow-md p-1 text-neutral-50 text-left p-4">
-          24 Hr Avg Car Stats
+          {title}
         </div>
         <div className="text-lg text-neutral-50 text-left p-4">
           Top Speed: {stats.TopSpeed} MPH

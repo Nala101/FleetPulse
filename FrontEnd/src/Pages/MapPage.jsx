@@ -238,7 +238,7 @@ function Menu(){
     );
   return (
     <div>
-    <StatsMenu data={data}/>;
+    <StatsMenu data={data} title={"24 Hour Stats"}/>;
   </div>
   );
 }
