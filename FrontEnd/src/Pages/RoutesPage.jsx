@@ -32,6 +32,20 @@ import useSWR from "swr";
 import MapWindow from "../Components/MapWindow";
 
 
+
+const GROUP_COLORS = {
+  1: "pink",
+  2: "red",
+  3: "orange",
+  4: "yellow",
+  5: "green",
+  6: "cyan",
+  7: "blue",
+  8: "purple",
+  9: "stone",
+  10: "rose",
+};
+
 const fetcher = async (...args) => {
   const res = await fetch(...args);
   const json = await res.json().catch(() => ({}));
@@ -195,8 +209,14 @@ function Menu(){
       menuItems.push(
         <StatsMenu
           key={i} // IMPORTANT: React needs a unique 'key' for lists
-          data={ routes[i] }
-          title={"Route " + routes[i].PeriodGroup}
+          data={routes[i]}
+          title={
+            "Route " +
+            routes[i].PeriodGroup +
+            " (" +
+            (GROUP_COLORS[i] || "blue") +
+            ")"
+          }
         />
       );
     }
