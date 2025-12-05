@@ -35,6 +35,10 @@ SELECT
 export default function StatsMenu({data, title}){
 
   const stats = data.info;
+
+  const startTime = stats.StartTime.split("T")[0] + ": "  + stats.StartTime.split("T")[1];
+  const endTime = stats.EndTime.split("T")[0] + ": "  + stats.EndTime.split("T")[1];
+
   return (
     <div className="py-4 px-3">
       <div className="flex flex-col bg-surface-600 rounded-md mx-auto shadow-2xl p">
@@ -64,6 +68,12 @@ export default function StatsMenu({data, title}){
         <div className="text-lg text-neutral-50 text-left p-4">
           AVG CabinHumidity:{" "}
           {stats.AvgCabinHumidity}%
+        </div>
+        <div className="text-lg text-neutral-50 text-left p-4">
+          Driving Start Time: {startTime}
+        </div>
+        <div className="text-lg text-neutral-50 text-left p-4">
+          Driving End Time: {endTime}
         </div>
       </div>
     </div>
