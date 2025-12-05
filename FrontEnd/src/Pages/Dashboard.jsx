@@ -44,8 +44,8 @@ export default function Dashboard() {
     {
       key: "LastLocation",
       location: {
-        lat: stats.latitude,
-        lng: stats.longitude,
+        lat: stats.Latitude,
+        lng: stats.Longitude,
       },
     },
   ];
@@ -55,7 +55,7 @@ export default function Dashboard() {
         <div className="flex flex-wrap gap-4 p-4 justify-center">
           <InfoCard
             title="Speed"
-            content={stats.Speed + " MPH"}
+            content={stats.Mph + " MPH"}
           />
           <InfoCard
             title="RPM"
@@ -63,19 +63,19 @@ export default function Dashboard() {
           />
           <InfoCard
             title="Fuel Level"
-            content={stats.Fuel + " %"}
+            content={stats.FuelPercent + " %"}
           />
           <InfoCard
             title="Cabin Temp"
-            content={stats.Tempurature + "°F"}
+            content={
+              stats.CabinTemperature + "°F"
+            }
           />
         </div>
       </div>
 
       <div>
-        <MapCard
-          location={locations}
-        />
+        <MapCard location={locations} />
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import sql from "mssql";
 import dotenv from "dotenv";
 dotenv.config();
 
-const DEBUG = true;
+const DEBUG = false;
 
 const config = {
   user: process.env.DB_USER,
@@ -35,18 +35,18 @@ const poolConnect = pool.connect();
 // like getting the location data in the last 24 hr or like
 // the average data, if you want we can do the avg data calc in the backend instead of the query
 
-export async function getData(row_num) {
+export async function carStatus(row_num) {
   try {
     // ensure connected before querying
     await poolConnect;
     const result = await pool
       .request()
-      .input("n", sql.Int, row_num).query(`
+      .query(`
       SELECT TOP 1 *
       FROM dbo.Msg as msg
       ORDER BY msg.UploadTime DESC
     `);
-    console.log(result.recordset[0])
+    console.log(result.recordset[0]);
     return result.recordset[0]; // array of objects (rows)
   } catch (err) {
     console.error("DB ERROR:", err);

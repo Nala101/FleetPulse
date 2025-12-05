@@ -1,5 +1,5 @@
 import React from "react";
-import { MapWindow } from "../Pages/MapPage";
+import MapWindow from "./MapWindow";
 
 
 export default function MapCard({location}){

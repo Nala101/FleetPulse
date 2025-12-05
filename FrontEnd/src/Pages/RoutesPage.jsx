@@ -29,8 +29,7 @@ import { Circle } from "../Components/circle";
 import StatsMenu from "../Components/StatsMenu";
 import ErrorNotification from "../Components/ErrorNotification";
 import useSWR from "swr";
-import { MapWindow } from "./MapPage";
-
+import MapWindow from "../Components/MapWindow";
 
 
 const fetcher = async (...args) => {
@@ -198,7 +197,7 @@ function Menu(){
       menuItems.push(
         <StatsMenu
           key={i} // 3. IMPORTANT: React needs a unique 'key' for lists
-          data={{ info: routes[i] }}
+          data={ routes[i] }
           title={"Route " + routes[i].PeriodGroup}
         />
       );

@@ -4,7 +4,7 @@
 import express from "express";
 import cors from "cors";
 
-import { getData } from "./sql_connection.js";
+import { carStatus } from "./sql_connection.js";
 import { getLocationData } from "./sql_connection.js";
 import { get24HourAverages } from "./sql_connection.js";
 import { getRouteData } from "./sql_connection.js";
@@ -14,8 +14,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
-const DEBUG = process.env.DEBUG === "true" || false;
+const PORT = process.env.PORT;
+const DEBUG = false;
 
 // export for tests
 export default app;
@@ -25,32 +25,12 @@ app.get("/", (req, res) => {
   res.send("Connected");
 });
 
-
 // API Route (GET): Fetch latest car status
+// gets the current status of the car
 app.get("/api/car-status", async (req, res) => {
-  if (!DEBUG) {
-    console.log("Sending Car-Status Query")
-    const data = await getData(1);
-    if (!data) {
-      res
-        .status(500)
-        .json({ error: "Database error" });
-    } else {
-      res.json({
-        info: {
-          Speed: data.Mph,
-          Rpm: data.Rpm,
-          Fuel: data.FuelPercent,
-          Tempurature: data.EngineTemp,
-          latitude: data.Latitude,
-          longitude: data.Longitude
-        },
-        timestamp: new Date(),
-        status: "success",
-      });
-    }
-  } else {
-    res.json({
+  //for debuging if the server cant be reached will send placeholder data
+  if (DEBUG) {
+    return res.json({
       info: {
         Speed: 0,
         Rpm: 0,
@@ -63,13 +43,264 @@ app.get("/api/car-status", async (req, res) => {
       status: "success",
     });
   }
+  try {
+    //calls the query to get the car information and then sends it back to the database
+    console.log("Sending car-status Query");
+    const data = await carStatus();
+
+    // error handling
+    if (!data) {
+      return res.status(500).json({
+        error: "Database error: No Data Found",
+      });
+    }
+
+    res.json({
+      info: data,
+      timestamp: new Date(),
+      status: "success",
+    });
+  } catch (err) {
+    console.error(
+      "API ERROR (/api/car-status):",
+      err
+    );
+    res
+      .status(500)
+      .json({ error: "Server error" });
+  }
 });
 
 // API Route (GET): Fetch
-app.get("/api/car-24-status", async (req, res) => {
+// get the average stats of the car over the last 24 hours
+app.get(
+  "/api/car-24-status",
+  async (req, res) => {
+    //for debuging if the server cant be reached will send placeholder data
+    if (DEBUG) {
+      return res.json({
+        info: {
+          TopSpeed: 0,
+          AvgSpeed: 0,
+          AvgCabinTemp: 0,
+          AvgEngineTemp: 0,
+          TotalMiles: 0,
+          StartTime: 0,
+          EndTime: 1,
+        },
+        timestamp: new Date(),
+        status: "success",
+      });
+    }
 
+    try {
+      console.log("Sending car-24-status Query");
+      const data = await get24HourAverages();
+
+      // error handling
+      if (!data) {
+        return res.status(500).json({
+          error: "Database error: No Data Found",
+        });
+      }
+
+      res.json({
+        info: data,
+        timestamp: new Date(),
+        status: "success",
+      });
+    } catch (err) {
+      console.error(
+        "API ERROR (/api/car-24-status):",
+        err
+      );
+      res
+        .status(500)
+        .json({ error: "Server error" });
+    }
+  }
+);
+
+// API Route (GET): Fetch data
+// gets the location data over the last 24 hours from the car as coordinates
+app.get(
+  "/api/location-data",
+  async (req, res) => {
+    //for debuging if the server cant be reached will send placeholder data
+    if (DEBUG) {
+      // Plain JS array of POIs
+      const locations = [
+        {
+          key: "botanicGardens",
+          location: {
+            lat: -33.864167,
+            lng: 151.216387,
+          },
+        },
+        {
+          key: "museumOfSydney",
+          location: {
+            lat: -33.8636005,
+            lng: 151.2092542,
+          },
+        },
+        {
+          key: "maritimeMuseum",
+          location: {
+            lat: -33.869395,
+            lng: 151.198648,
+          },
+        },
+      ];
+
+      res.json({
+        info: locations,
+        timestamp: new Date(),
+        status: "success",
+      });
+    }
+
+    try {
+      console.log("Sending location-data Query");
+
+      const rows = await getLocationData();
+
+      // error handling
+      if (!rows) {
+        return res.status(500).json({
+          error: "Database error: No Data Found",
+        });
+      }
+
+      // Transform DB rows to the shape MapPage expects: { key, location: { lat, lng } }
+      const locations = [];
+
+      for (const row of rows) {
+        // Extract the numbers
+        const lat = Number(row.Latitude);
+        const lng = Number(row.Longitude);
+
+        const isValid =
+          !isNaN(lat) && !isNaN(lng);
+
+        if (isValid) {
+          // adds to the list with a json
+          locations.push({
+            key: row.MsgID,
+            location: { lat, lng },
+          });
+        }
+      }
+
+      return res.json({
+        info: { Locations: locations },
+        timestamp: new Date(),
+        status: "success",
+      });
+    } catch (err) {
+      console.error(
+        "API ERROR (/api/location-data):",
+        err
+      );
+      res
+        .status(500)
+        .json({ error: "Server error" });
+    }
+  }
+);
+
+// API Route (GET): Fetch data
+// gets the locational data for the routes that the car took, it counts a route as stopping
+// for atleast 15min and then driving again, will return coordinate data for it
+app.get(
+  "/api/routes-locations",
+  async (req, res) => {
+    //for debuging if the server cant be reached will send placeholder data
+    if (DEBUG) {
+      // Plain JS array of POIs
+      const locations = [
+        {
+          key: "botanicGardens",
+          location: {
+            lat: -33.864167,
+            lng: 151.216387,
+          },
+        },
+        {
+          key: "museumOfSydney",
+          location: {
+            lat: -33.8636005,
+            lng: 151.2092542,
+          },
+        },
+        {
+          key: "maritimeMuseum",
+          location: {
+            lat: -33.869395,
+            lng: 151.198648,
+          },
+        },
+      ];
+
+      res.json({
+        info: locations,
+        timestamp: new Date(),
+        status: "success",
+      });
+    }
+    try {
+      console.log(
+        "Sending routes location Query"
+      );
+
+      const rows = await getRouteLocations();
+
+      // error handling
+      if (!rows) {
+        return res.status(500).json({
+          error: "Database error: No Data Found",
+        });
+      }
+
+      // Transform DB rows to the shape MapPage expects: { key, location: { lat, lng } }
+      const locations = [];
+
+      for (const row of rows) {
+        // Extract the numbers
+        const lat = Number(row.Latitude);
+        const lng = Number(row.Longitude);
+
+        const isValid =
+          !isNaN(lat) && !isNaN(lng);
+
+        if (isValid) {
+          // adds to the list with a json
+          locations.push({
+            key: row.MsgID,
+            location: { lat, lng },
+          });
+        }
+      }
+
+      return res.json({
+        info: { Locations: locations },
+        timestamp: new Date(),
+        status: "success",
+      });
+    } catch (err) {
+      res.status(500).json({
+        error: "API ERROR (/api/car-24-status):",
+      });
+    }
+  }
+);
+
+// API Route (GET): Fetch
+// gets the average data for each route that the car took, each route data has a
+// key called PeriodGroup that defines which route it is in the day.
+app.get("/api/routes-data", async (req, res) => {
+  //for debuging if the server cant be reached will send placeholder data
   if (DEBUG) {
-    // DEBUG MODE → return mock data
     return res.json({
       info: {
         TopSpeed: 0,
@@ -83,232 +314,25 @@ app.get("/api/car-24-status", async (req, res) => {
     });
   }
 
-  // 2. Production Mode
   try {
-    console.log("Sending car-24-status Query");
+    console.log("Sending routes Query");
 
-    const data = await get24HourAverages(); // <-- use your new stats function
+    const data = await getRouteData();
 
+    // error handling
     if (!data) {
-      return res.status(500).json({ error: "Database error" });
+      return res.status(500).json({
+        error: "Database error: No Data Found",
+      });
     }
-
-    res.json({
-      info: {
-        TopSpeed: data.TopSpeed,
-        AvgSpeed: data.AvgSpeed,
-        AvgCabinTemp: data.AvgCabinTemp,
-        AvgEngineTemp: data.AvgEngineTemp,
-        TtlMilesTraveled: data.TtlMilesTraveled,
-        AvgCabinHumidity: data.AvgCabinHumidity,
-        AvgMPG: data.AvgMPG
-      },
-      timestamp: new Date(),
-      status: "success",
-    });
+    console.log("server data: ", data);
+    return res.json({ data });
   } catch (err) {
-    console.error("API ERROR (/api/car-24-status):", err);
-    res.status(500).json({ error: "Server error" });
-  }
-}); 
-
-
-
-
-// API Route (GET): Fetch data
-app.get("/api/location-data", async (req, res) => {
-  if (!DEBUG) {
-    try {
-      console.log("Sending location-data Query");
-
-      const rows = await getLocationData();
-      if (!rows) {
-        console.error("DB: no rows returned for /api/location-data", { rows });
-        return res.status(500).json({ error: "Database error" });
-      }
-
-      // Transform DB rows to the shape MapPage expects: { key, location: { lat, lng } }
-      const pois = rows
-        .map((r, i) => {
-          const lat = Number(r.Latitude ?? r.lat ?? r.Lat ?? r.latitude);
-          const lng = Number(r.Longitude ?? r.lng ?? r.Lon ?? r.lon ?? r.longitude);
-          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-          return {
-            key: r.MsgID ? `msg-${r.MsgID}` : `row-${i}`,
-            location: { lat, lng },
-          };
-        })
-        .filter(Boolean);
-
-      res.json({
-        info: pois,
-        timestamp: new Date(),
-        status: "success",
-      });
-    }catch (err) {
-        console.error(
-          "API ERROR (/api/car-24-status):",
-          err
-        );
-        res
-          .status(500)
-          .json({ error: "Server error" });
-      }
-  } else {
-    // Plain JS array of POIs
-    const locations = [
-      {
-        key: "botanicGardens",
-        location: {
-          lat: -33.864167,
-          lng: 151.216387,
-        },
-      },
-      {
-        key: "museumOfSydney",
-        location: {
-          lat: -33.8636005,
-          lng: 151.2092542,
-        },
-      },
-      {
-        key: "maritimeMuseum",
-        location: {
-          lat: -33.869395,
-          lng: 151.198648,
-        },
-      },
-    ];
-
-    res.json({
-      info: locations,
-      timestamp: new Date(),
-      status: "success",
+    res.status(500).json({
+      error: "API ERROR (/api/routes-data):",
     });
   }
 });
-
-
-
-
-// API Route (GET): Fetch data
-app.get("/api/routes-locations", async (req, res) => {
-  if (!DEBUG) {
-    try {
-      console.log("Sending routes location Query");
-
-      const rows = await getRouteLocations();
-      if (!rows) {
-        console.error("DB: no rows returned for /api/location-data", { rows });
-        return res.status(500).json({ error: "Database error" });
-      }
-
-      // Transform DB rows to the shape MapPage expects: { key, location: { lat, lng } }
-      const pois = rows
-        .map((r, i) => {
-          const lat = Number(r.Latitude ?? r.lat ?? r.Lat ?? r.latitude);
-          const lng = Number(r.Longitude ?? r.lng ?? r.Lon ?? r.lon ?? r.longitude);
-          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-          return {
-            key: r.MsgID ? `msg-${r.MsgID}` : `row-${i}`,
-            location: { lat, lng },
-          };
-        })
-        .filter(Boolean);
-
-      res.json({
-        info: pois,
-        timestamp: new Date(),
-        status: "success",
-      });
-    }catch (err) {
-        console.error(
-          "API ERROR (/api/car-24-status):",
-          err
-        );
-        res
-          .status(500)
-          .json({ error: "Server error" });
-      }
-  } else {
-    // Plain JS array of POIs
-    const locations = [
-      {
-        key: "botanicGardens",
-        location: {
-          lat: -33.864167,
-          lng: 151.216387,
-        },
-      },
-      {
-        key: "museumOfSydney",
-        location: {
-          lat: -33.8636005,
-          lng: 151.2092542,
-        },
-      },
-      {
-        key: "maritimeMuseum",
-        location: {
-          lat: -33.869395,
-          lng: 151.198648,
-        },
-      },
-    ];
-
-    res.json({
-      info: locations,
-      timestamp: new Date(),
-      status: "success",
-    });
-  }
-});
-
-
-
-
-// API Route (GET): Fetch
-app.get("/api/routes-data",  async (req, res) => {
-    if (DEBUG) {
-      // DEBUG MODE → return mock data
-      return res.json({
-        info: {
-          TopSpeed: 0,
-          AvgSpeed: 0,
-          AvgCabinTemp: 0,
-          AvgEngineTemp: 0,
-          TotalMiles: 0,
-        },
-        timestamp: new Date(),
-        status: "success",
-      });
-    }
-
-    // 2. Production Mode
-    try {
-      console.log("Sending routes Query");
-
-      const data = await getRouteData(); // <-- use your new stats function
-
-      if (!data) {
-        return res
-          .status(500)
-          .json({ error: "Database error" });
-      }
-      console.log("server data", data);
-      res.json({data});
-    } catch (err) {
-      console.error(
-        "API ERROR (/api/routes-status):",
-        err
-      );
-      res
-        .status(500)
-        .json({ error: "Server error" });
-    }
-  }
-); 
-
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -326,8 +350,3 @@ app.listen(PORT, () => {
     `---------------------------------------`
   );
 });
-
-
-
-
-
