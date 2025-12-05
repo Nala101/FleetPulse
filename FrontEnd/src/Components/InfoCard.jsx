@@ -1,6 +1,6 @@
 import React from "react";
 
-
+// info card used to display metrics and data, just takes in the title and data you want to display
 export default function InfoCard({title, content}){
     return (
       <div className="bg-surface-600 rounded-md mx-auto shadow-2xl">

@@ -15,7 +15,6 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-
 import {
   APIProvider,
   Map,
@@ -23,11 +22,10 @@ import {
   AdvancedMarker,
   Pin,
 } from "@vis.gl/react-google-maps";
-
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
-
 import { Circle } from "../Components/circle";
 
+// colors for the map markers, this is used for the different routes
 const GROUP_COLORS = {
   1: "bg-pink-500",
   2: "bg-red-500",
@@ -41,6 +39,8 @@ const GROUP_COLORS = {
   10: "bg-rose-500",
 };
 
+// creates the map from the google maps api, this code was taken from the example code 
+// from the google maps api github example
 export default function MapWindow({ locations }) {
   return (
     <div className="flex flex-row">
@@ -84,6 +84,7 @@ export default function MapWindow({ locations }) {
   );
 }
 
+// creates the markers for the map
 const PoiMarkers = ({ pois }) => {
   const map = useMap();
   const [markers, setMarkers] = useState({});
@@ -150,6 +151,8 @@ const PoiMarkers = ({ pois }) => {
       />
 
       {pois.map((poi) => {
+
+        // this part will color the marker based on the route it is
         const colorClass = GROUP_COLORS[poi.PeriodGroup] || "bg-blue-500";
         
         return (
