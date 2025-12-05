@@ -1,19 +1,3 @@
-import React from "react";
-import ErrorNotification from "../Components/ErrorNotification";
-import useSWR from "swr";
-
-const fetcher = async (...args) => {
-  const res = await fetch(...args);
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const err = new Error(
-      `Request failed: ${res.status}`
-    );
-    err.info = json;
-    throw err;
-  }
-  return json;
-};
 
 /*
 Here is the sql query for reference 
@@ -31,14 +15,15 @@ SELECT
 */
 
 // this creates a new card for the average stats for the car data
-// bascially just intakes the title and json for the data pulled from
-// the database and shows it
+// bascially just intakes the title and json for the data given to 
+// the function and shows it
 export default function StatsMenu({
   data,
   title,
 }) {
   const stats = data;
 
+  // this splits up the time data so it is formated nicely 
   const startTime =
     stats.StartTime.split("T")[0] +
     ": " +
