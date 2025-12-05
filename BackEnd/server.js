@@ -280,7 +280,7 @@ app.get(
 
       // Transform DB rows to the shape MapPage expects: { key, location: { lat, lng } }
       const locations = [];
-
+      let i = 1;
       for (const row of data) {
         // Extract the numbers
         const lat = Number(row.Latitude);
@@ -292,11 +292,15 @@ app.get(
         if (isValid) {
           // adds to the list with a json
           locations.push({
-            key: row.PeroidGroup,
+            key: i,
             location: { lat, lng },
+            PeriodGroup: row.PeriodGroup,
           });
         }
+        i++;
       }
+      
+      console.log(locations);
 
       return res.json({
         info: { Locations: locations },

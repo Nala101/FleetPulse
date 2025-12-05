@@ -68,6 +68,7 @@ export default function RoutesPage(){
   // since it could load before it finishes connecting to the back end, so it wil just default to
   // empty array if it is not an array yet
   let locations = data.info.Locations;
+    console.log(locations);
 
   return (
     <div>
@@ -185,12 +186,12 @@ function Menu(){
   // Safely access the inner data 
   // The ?. check prevents crashing if data is null during loading
   const routes = data?.info;
-  console.log("adfafa",routes);
+
   const menuItems = [];
 
   if (routes && Array.isArray(routes)) {
     for (let i = 0; i < routes.length; i++) {
-      console.log(routes[i]);
+
       menuItems.push(
         <StatsMenu
           key={i} // IMPORTANT: React needs a unique 'key' for lists
