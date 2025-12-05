@@ -63,7 +63,7 @@ export default function MapPage() {
       </div>
     );
 
-  // makes sure locations is an array cuz if not it will break the google maps,
+  // make sure locations is an array cuz if not it will break the google maps,
   // since it could load before it finishes connecting to the back end, so it wil just default to
   // empty array if it is not an array yet
   let locations = data.info.Locations;
@@ -99,8 +99,7 @@ function Menu() {
       </div>
     );
 
-  data.info.StartTime = "T0:00";
-  data.info.EndTime = "T23:59";
+  
 
 
   return (

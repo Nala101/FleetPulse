@@ -28,6 +28,19 @@ import { MarkerClusterer } from "@googlemaps/markerclusterer";
 
 import { Circle } from "../Components/circle";
 
+const GROUP_COLORS = {
+  1: "bg-pink-500",
+  2: "bg-red-500",
+  3: "bg-orange-500",
+  4: "bg-yellow-500",
+  5: "bg-green-500",
+  6: "bg-cyan-500",
+  7: "bg-blue-500",
+  8: "bg-purple-500",
+  9: "bg-stone-500",
+  10: "bg-rose-500",
+};
+
 export default function MapWindow({ locations }) {
   return (
     <div className="flex flex-row">
@@ -136,19 +149,24 @@ const PoiMarkers = ({ pois }) => {
         fillOpacity={0.3}
       />
 
-      {pois.map((poi) => (
-        <AdvancedMarker
-          key={poi.key}
-          position={poi.location}
-          ref={(marker) =>
-            setMarkerRef(marker, poi.key)
-          }
-          clickable={true}
-          onClick={handleClick}
-        >
-          <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>
-        </AdvancedMarker>
-      ))}
+      {pois.map((poi) => {
+        const colorClass = GROUP_COLORS[poi.PeriodGroup] || "bg-blue-500";
+        
+        return (
+          <AdvancedMarker
+            key={poi.key}
+            position={poi.location}
+            ref={(marker) =>
+              setMarkerRef(marker, poi.key)
+            }
+            clickable={true}
+            onClick={handleClick}
+          >
+            <div
+              className={`w-4 h-4 rounded-full border-2 border-white shadow-sm ${colorClass}`}
+            ></div>
+          </AdvancedMarker>
+        );})}
     </>
   );
 };

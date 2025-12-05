@@ -61,14 +61,15 @@ export default function StatsMenu({
             Top Speed: {stats.TopSpeed} MPH{" "}
           </div>
           <div>
-            AVG Speed: {stats.AvgSpeed} MPH AVG
+            AVG Speed: {stats.AvgSpeed} MPH
           </div>
           <div>
-            Cabin Temps: {stats.AvgCabinTemp} F
-            AVG
+            AVG Cabin Temps: {stats.AvgCabinTemp}{" "}
+            F
           </div>
           <div>
-            Engine Temps: {stats.AvgEngineTemp} F
+            AVG Engine Temps: {stats.AvgEngineTemp}{" "}
+            F
           </div>
           <div>
             Total Miles Traveled:{" "}

@@ -8,6 +8,7 @@ import { carStatus } from "./sql_connection.js";
 import { getLocationData } from "./sql_connection.js";
 import { get24HourAverages } from "./sql_connection.js";
 import { getRouteData } from "./sql_connection.js";
+import { getRouteLocations } from "./sql_connection.js";
 const app = express();
 
 // CORS and JSON middleware
@@ -54,6 +55,8 @@ app.get("/api/car-status", async (req, res) => {
         error: "Database error: No Data Found",
       });
     }
+
+    console.log("server data: ", data);
 
     res.json({
       info: data,
@@ -103,6 +106,14 @@ app.get(
           error: "Database error: No Data Found",
         });
       }
+
+
+
+      data.StartTime = "T0:00";
+      data.EndTime = "T23:59";
+
+      console.log("server data: ", data);
+
 
       res.json({
         info: data,
@@ -163,19 +174,21 @@ app.get(
     try {
       console.log("Sending location-data Query");
 
-      const rows = await getLocationData();
+      const data = await getLocationData();
 
       // error handling
-      if (!rows) {
+      if (!data) {
         return res.status(500).json({
           error: "Database error: No Data Found",
         });
       }
 
+      console.log("server data: ", data);
+
       // Transform DB rows to the shape MapPage expects: { key, location: { lat, lng } }
       const locations = [];
 
-      for (const row of rows) {
+      for (const row of data) {
         // Extract the numbers
         const lat = Number(row.Latitude);
         const lng = Number(row.Longitude);
@@ -253,10 +266,13 @@ app.get(
         "Sending routes location Query"
       );
 
-      const rows = await getRouteLocations();
+      const data = await getRouteLocations();
+
+      //console.log("server data: ", data);
 
       // error handling
-      if (!rows) {
+      if (!data) {
+        
         return res.status(500).json({
           error: "Database error: No Data Found",
         });
@@ -265,7 +281,7 @@ app.get(
       // Transform DB rows to the shape MapPage expects: { key, location: { lat, lng } }
       const locations = [];
 
-      for (const row of rows) {
+      for (const row of data) {
         // Extract the numbers
         const lat = Number(row.Latitude);
         const lng = Number(row.Longitude);
@@ -276,7 +292,7 @@ app.get(
         if (isValid) {
           // adds to the list with a json
           locations.push({
-            key: row.MsgID,
+            key: row.PeroidGroup,
             location: { lat, lng },
           });
         }
@@ -315,9 +331,11 @@ app.get("/api/routes-data", async (req, res) => {
   }
 
   try {
-    console.log("Sending routes Query");
+    console.log("Sending routes-data Query");
 
     const data = await getRouteData();
+
+
 
     // error handling
     if (!data) {
@@ -325,8 +343,12 @@ app.get("/api/routes-data", async (req, res) => {
         error: "Database error: No Data Found",
       });
     }
-    console.log("server data: ", data);
-    return res.json({ data });
+    //console.log("server data: ", data);
+    res.json({
+      info: data,
+      timestamp: new Date(),
+      status: "success",
+    });
   } catch (err) {
     res.status(500).json({
       error: "API ERROR (/api/routes-data):",

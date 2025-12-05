@@ -44,10 +44,8 @@ const fetcher = async (...args) => {
 };
 
 export default function RoutesPage(){
-
-
   const { data, error, isLoading } = useSWR(
-    "http://localhost:3000/api/location-data",
+    "http://localhost:3000/api/routes-locations",
     fetcher,
     { refreshInterval: 1000 } // 3. Configuration: Auto-fetch every 1000ms (1s)
   );
@@ -66,19 +64,17 @@ export default function RoutesPage(){
       </div>
     );
 
-  // makes sure locations is an array cuz if not it will break the google maps,
+  // make sure locations is an array cuz if not it will break the google maps,
   // since it could load before it finishes connecting to the back end, so it wil just default to
   // empty array if it is not an array yet
-  const locations = Array.isArray(data?.info)
-    ? data.info
-    : [];
+  let locations = data.info.Locations;
 
- return (
-   <div>
-     <MapWindow locations={locations} />
-     <Menu />
-   </div>
- );
+  return (
+    <div>
+      <MapWindow locations={locations} />
+      <Menu />
+    </div>
+  );
 }
 
 
@@ -188,7 +184,8 @@ function Menu(){
 
   // Safely access the inner data 
   // The ?. check prevents crashing if data is null during loading
-  const routes = data?.data;
+  const routes = data?.info;
+  console.log("adfafa",routes);
   const menuItems = [];
 
   if (routes && Array.isArray(routes)) {
@@ -196,14 +193,14 @@ function Menu(){
       console.log(routes[i]);
       menuItems.push(
         <StatsMenu
-          key={i} // 3. IMPORTANT: React needs a unique 'key' for lists
+          key={i} // IMPORTANT: React needs a unique 'key' for lists
           data={ routes[i] }
           title={"Route " + routes[i].PeriodGroup}
         />
       );
     }
   }
-  console.log(menuItems);
+
   return (
     <div className="flex flex-row">
       {menuItems}

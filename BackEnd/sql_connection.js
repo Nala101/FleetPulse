@@ -2,7 +2,7 @@ import sql from "mssql";
 import dotenv from "dotenv";
 dotenv.config();
 
-const DEBUG = false;
+
 
 const config = {
   user: process.env.DB_USER,
@@ -46,7 +46,7 @@ export async function carStatus(row_num) {
       FROM dbo.Msg as msg
       ORDER BY msg.UploadTime DESC
     `);
-    console.log(result.recordset[0]);
+
     return result.recordset[0]; // array of objects (rows)
   } catch (err) {
     console.error("DB ERROR:", err);
@@ -75,7 +75,7 @@ export async function get24HourAverages() {
   try {
     await poolConnect;
     const result = await pool.request().query(`
-     SELECT
+           SELECT
       MAX(msg.mph) as 'TopSpeed',
       AVG(msg.mph) as 'AvgSpeed',
       AVG(msg.CabinTemperature) as 'AvgCabinTemp',
@@ -84,8 +84,7 @@ export async function get24HourAverages() {
       SUM(msg.MilesTraveled) as 'TtlMilesTraveled',
       SUM(msg.MilesTraveled)/SUM(msg.GalUsed) as 'AvgMPG'
       FROM dbo.Msg as msg
-      WHERE msg.UploadTime > DATEADD(HOUR, -96, GETDATE())
-
+      WHERE msg.UploadTime > DATEADD(HOUR, -120, GETDATE())
     `);
 
     return result.recordset[0];
@@ -104,7 +103,7 @@ export async function getRouteData() {
      WITH Recent AS (
     SELECT *
     FROM Msg
-    WHERE UploadTime >= DATEADD(HOUR, -96, GETDATE())
+    WHERE UploadTime >= DATEADD(HOUR, -120, GETDATE())
 ),
 TravelPeriodFlags AS (
     SELECT
@@ -151,11 +150,11 @@ ORDER BY StartTime
 export async function getRouteLocations() {
   try {
     await poolConnect;
-    const result = await pool.request().query(`
-     WITH Recent AS (
+    const result = await pool.request()
+      .query(`WITH Recent AS (
     SELECT *
     FROM Msg
-    WHERE UploadTime >= DATEADD(HOUR, -96, GETDATE())
+    WHERE UploadTime >= DATEADD(HOUR, -120, GETDATE())
 ),
 TravelPeriodFlags AS (
     SELECT
@@ -181,11 +180,9 @@ SELECT
     Groups.Latitude,
     Groups.Longitude
 FROM Groups
-ORDER BY Groups.UploadTime
+ORDER BY Groups.UploadTime`);
 
-    `);
-
-    return result.recordset[0];
+    return result.recordset;
   } catch (err) {
     console.error("DB ERROR:", err);
     return null;
