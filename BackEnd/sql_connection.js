@@ -55,9 +55,16 @@ export async function getLocationData() {
     // ensure connected before querying
     await poolConnect;
     const result = await pool.request().query(`
-      SELECT MsgID, UploadTime, Latitude, Longitude, Mph
-      FROM Msg
-      ORDER BY UploadTime DESC
+    SELECT
+  MsgID AS [key],
+  CAST(Latitude AS float)  AS lat,
+  CAST(Longitude AS float) AS lng
+FROM Msg
+ORDER BY UploadTime DESC;
+
+
+
+
     `);
 
     return result.recordset; // array of objects (rows)
@@ -81,7 +88,7 @@ export async function get24HourAverages() {
       SUM(msg.MilesTraveled) as 'TtlMilesTraveled',
       SUM(msg.MilesTraveled)/SUM(msg.GalUsed) as 'AvgMPG'
       FROM dbo.Msg as msg
-      WHERE msg.UploadTime > DATEADD(HOUR, -120, GETDATE())
+      WHERE msg.UploadTime > DATEADD(HOUR, -200, GETDATE())
     `);
 
     return result.recordset[0];
@@ -100,7 +107,7 @@ export async function getRouteData() {
      WITH Recent AS (
     SELECT *
     FROM Msg
-    WHERE UploadTime >= DATEADD(HOUR, -120, GETDATE())
+    WHERE UploadTime >= DATEADD(HOUR, -200, GETDATE())
 ),
 TravelPeriodFlags AS (
     SELECT
@@ -152,7 +159,7 @@ export async function getRouteLocations() {
       .query(`WITH Recent AS (
     SELECT *
     FROM Msg
-    WHERE UploadTime >= DATEADD(HOUR, -120, GETDATE())
+    WHERE UploadTime >= DATEADD(HOUR, -200, GETDATE())
 ),
 TravelPeriodFlags AS (
     SELECT
@@ -172,13 +179,20 @@ Groups AS (
         SUM(TravelPeriodStart) OVER (ORDER BY UploadTime
                                      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PeriodGroup
     FROM TravelPeriodFlags
+),
+Final AS (
+    SELECT
+        ROW_NUMBER() OVER (ORDER BY UploadTime) AS [key],
+        PeriodGroup,
+        CAST(Latitude AS float) AS lat,      -- <-- directly return numeric values
+        CAST(Longitude AS float) AS lng      -- <-- no JSON, no string, no parse needed
+    FROM Groups
 )
-SELECT 
-    Groups.PeriodGroup,
-    Groups.Latitude,
-    Groups.Longitude
-FROM Groups
-ORDER BY Groups.UploadTime`);
+SELECT *
+FROM Final
+ORDER BY [key];
+
+`);
 
     return result.recordset;
   } catch (err) {

@@ -72,7 +72,7 @@ export default function RoutesPage() {
   // make sure locations is an array cuz if not it will break the google maps,
   // since it could load before it finishes connecting to the back end, so it wil just default to
   // empty array if it is not an array yet
-  let locations = data.info.Locations;
+  let locations = data.info;
   console.log(locations);
 
   return (

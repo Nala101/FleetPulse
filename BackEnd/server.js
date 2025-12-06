@@ -45,34 +45,14 @@ app.get("/api/car-status", async (req, res) => {
       status: "success",
     });
   }
-  try {
-    //calls the query to get the car information and then sends it back to the database
-    console.log("Sending car-status Query");
-    const data = await carStatus();
 
-    // error handling
-    if (!data) {
-      return res.status(500).json({
-        error: "Database error: No Data Found",
-      });
-    }
-
-    console.log("server data: ", data);
-
-    res.json({
-      info: data,
-      timestamp: new Date(),
-      status: "success",
-    });
-  } catch (err) {
-    console.error(
-      "API ERROR (/api/car-status):",
-      err
-    );
-    res
-      .status(500)
-      .json({ error: "Server error" });
-  }
+  return querySQLDataAndSetReponse({
+    res: res,
+    req: req,
+    func: carStatus,
+    apiCallName: "car-status Query",
+    transform: null,
+  });
 });
 
 // API Route (GET): Fetch
@@ -97,38 +77,13 @@ app.get(
         status: "success",
       });
     }
-
-    try {
-      console.log("Sending car-24-status Query");
-      const data = await get24HourAverages();
-
-      // error handling
-      if (!data) {
-        return res.status(500).json({
-          error: "Database error: No Data Found",
-        });
-      }
-
-      // since stats menu needs time as well, just puts these as place holder
-      data.StartTime = "T0:00";
-      data.EndTime = "T23:59";
-
-      console.log("server data: ", data);
-
-      res.json({
-        info: data,
-        timestamp: new Date(),
-        status: "success",
-      });
-    } catch (err) {
-      console.error(
-        "API ERROR (/api/car-24-status):",
-        err
-      );
-      res
-        .status(500)
-        .json({ error: "Server error" });
-    }
+  return querySQLDataAndSetReponse({
+    res: res,
+    req: req,
+    func: get24HourAverages,
+    apiCallName: "car-24-status Query",
+    transform: addTemporaryTime,
+  });
   }
 );
 
@@ -173,56 +128,14 @@ app.get(
       });
     }
 
-    try {
-      console.log("Sending location-data Query");
-
-      const data = await getLocationData();
-
-      // error handling
-      if (!data) {
-        return res.status(500).json({
-          error: "Database error: No Data Found",
-        });
-      }
-
-      console.log("server data: ", data);
-
-      // Transform DB rows to the shape the google map api expects: { key, location: { lat, lng } }
-      const locations = [];
-
-      // iterates through each row formating them
-      for (const row of data) {
-        // Extract the numbers
-        const lat = Number(row.Latitude);
-        const lng = Number(row.Longitude);
-
-        const isValid =
-          !isNaN(lat) && !isNaN(lng);
-
-        if (isValid) {
-          // adds to the list with a json
-          locations.push({
-            key: row.MsgID,
-            location: { lat, lng },
-          });
-        }
-      }
-
-      return res.json({
-        info: { Locations: locations },
-        timestamp: new Date(),
-        status: "success",
-      });
-    } catch (err) {
-      console.error(
-        "API ERROR (/api/location-data):",
-        err
-      );
-      res
-        .status(500)
-        .json({ error: "Server error" });
-    }
-  }
+    return querySQLDataAndSetReponse({
+      res: res,
+      req: req,
+      func: getLocationData,
+      apiCallName: "location-data Query",
+      transform: formatLocationalData,
+    });
+}
 );
 
 // API Route (GET): Fetch data
@@ -266,56 +179,13 @@ app.get(
         status: "success",
       });
     }
-    try {
-      console.log(
-        "Sending routes location Query"
-      );
-
-      const data = await getRouteLocations();
-
-      //console.log("server data: ", data);
-
-      // error handling
-      if (!data) {
-        return res.status(500).json({
-          error: "Database error: No Data Found",
-        });
-      }
-
-      // Transform DB rows to the shape google maps api expects: { key, location: { lat, lng } }
-      const locations = [];
-      let i = 1;
-
-      // iterates through the rows and formats the data
-      for (const row of data) {
-        // Extract the numbers
-        const lat = Number(row.Latitude);
-        const lng = Number(row.Longitude);
-
-        const isValid =
-          !isNaN(lat) && !isNaN(lng);
-
-        if (isValid) {
-          // adds to the list with a json
-          locations.push({
-            key: i,
-            location: { lat, lng },
-            PeriodGroup: row.PeriodGroup,
-          });
-        }
-        i++;
-      }
-      
-      return res.json({
-        info: { Locations: locations },
-        timestamp: new Date(),
-        status: "success",
-      });
-    } catch (err) {
-      res.status(500).json({
-        error: "API ERROR (/api/car-24-status):",
-      });
-    }
+    return querySQLDataAndSetReponse({
+      res: res,
+      req: req,
+      func: getRouteLocations,
+      apiCallName: "routes-locations Query",
+      transform: formatLocationalData,
+    });
   }
 );
 
@@ -340,28 +210,13 @@ app.get("/api/routes-data", async (req, res) => {
     });
   }
 
-  try {
-    console.log("Sending routes-data Query");
-
-    const data = await getRouteData();
-
-    // error handling
-    if (!data) {
-      return res.status(500).json({
-        error: "Database error: No Data Found",
-      });
-    }
-    //console.log("server data: ", data);
-    res.json({
-      info: data,
-      timestamp: new Date(),
-      status: "success",
-    });
-  } catch (err) {
-    res.status(500).json({
-      error: "API ERROR (/api/routes-data):",
-    });
-  }
+  querySQLDataAndSetReponse({
+    res: res,
+    req: req,
+    func: getRouteData,
+    apiCallName: "routes-data Query",
+    transform: null
+  });
 });
 
 // middleware for catching errors 
@@ -382,3 +237,75 @@ app.listen(PORT, () => {
     `---------------------------------------`
   );
 });
+
+
+// this is the helper function for sending and reciving data from the sql server
+// it wraps it in try statments for catching errors and handles the sql querries with 
+// error handling 
+async function querySQLDataAndSetReponse({res, req, func, apiCallName, transform}){
+
+    try {
+      console.log("Sending car-24-status Query");
+      const queryData = await func();
+
+      // error handling
+      if (!queryData) {
+        return res.status(500).json({
+          error: "Database error: No Data Found",
+        });
+      }
+
+      // this will check if there is a transform function and apply it, if not it will just 
+      // pass through the data 
+      let data; 
+      if (transform){
+        data = transform(queryData);
+      }else{
+        data = queryData;
+      }
+
+      console.log(
+        `server data for ${apiCallName}: `,
+        data
+      );
+
+      // makes the response for the data 
+      res.json({
+        info: data,
+        timestamp: new Date(),
+        status: "success",
+      });
+    } catch (err) {
+      console.error(
+        `API ERROR (${apiCallName}):`,
+        err
+      );
+      res
+        .status(500)
+        .json({ error: "Server error: " + err });
+    }
+}
+
+// this helper function will format the data into a format that google maps api can read
+function formatLocationalData(data){
+  // this is will convert all the rows into the proper format for the google maps api
+  const locations = data.map((r) => ({
+    key: r.key,
+    location: {
+      lat: Number(r.lat),
+      lng: Number(r.lng),
+    },
+    PeriodGroup: r.PeriodGroup ?? null, // this will use null if its null
+  }));
+
+  return locations;
+}
+
+// just adds the time into the data as a place holder since the 
+// stats menu card needs time 
+function addTemporaryTime(data){
+  console.log(data);
+  data.StartTime = "T0:00";
+  data.EndTime = "T23:59";
+  return data;
+}
