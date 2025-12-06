@@ -16,6 +16,7 @@ import ErrorNotification from "../Components/ErrorNotification";
 import useSWR from "swr";
 import MapWindow from "../Components/MapWindow";
 
+// colors for the map markers, this is used for the different routes
 const GROUP_COLORS = {
   1: "pink",
   2: "red",
@@ -29,6 +30,7 @@ const GROUP_COLORS = {
   10: "rose",
 };
 
+// this is the fetcher for swr to use to query the backend endpoint
 const fetcher = async (...args) => {
   const res = await fetch(...args);
   const json = await res.json().catch(() => ({}));
@@ -42,13 +44,17 @@ const fetcher = async (...args) => {
   return json;
 };
 
+// This is the routes page that will display the routes that the user took on a map and 
+// the average data values for the diffferent routes
 export default function RoutesPage() {
+  // fetches data from the backend automatically
   const { data, error, isLoading } = useSWR(
     "http://localhost:3000/api/routes-locations",
     fetcher,
-    { refreshInterval: 1000 } // 3. Configuration: Auto-fetch every 1000ms (1s)
+    { refreshInterval: 1000 } // Configuration: Auto-fetch every 1000ms (1s)
   );
 
+  // error handling
   if (error)
     return (
       <div>
