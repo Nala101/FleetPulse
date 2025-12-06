@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-
+// most of this code was taken from the example code from google to use their api
 // just removed the type script stuff and turned it back into normal js
 // used this example https://github.com/googlemaps-samples/codelab-maps-platform-101-react-js/tree/main
 
@@ -84,7 +84,7 @@ export default function MapWindow({ locations }) {
   );
 }
 
-// creates the markers for the map
+// creates the markers for the map, code was taken from google 
 const PoiMarkers = ({ pois }) => {
   const map = useMap();
   const [markers, setMarkers] = useState({});

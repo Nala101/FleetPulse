@@ -3,35 +3,18 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-
 // just removed the type script stuff and turned it back into normal js
 // used this example https://github.com/googlemaps-samples/codelab-maps-platform-101-react-js/tree/main
 
+// this page is for the routes data so the user can visualize the differnet routes they took
+// currently a route is defined as having a 15min gap of being idle between drives
+// this page has a map with color coded routes as well as aggregate stats about each route
+// in a card below the map
 
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-} from "react";
-
-import {
-  APIProvider,
-  Map,
-  useMap,
-  AdvancedMarker,
-  Pin,
-} from "@vis.gl/react-google-maps";
-
-import { MarkerClusterer } from "@googlemaps/markerclusterer";
-
-import { Circle } from "../Components/circle";
 import StatsMenu from "../Components/StatsMenu";
 import ErrorNotification from "../Components/ErrorNotification";
 import useSWR from "swr";
 import MapWindow from "../Components/MapWindow";
-
-
 
 const GROUP_COLORS = {
   1: "pink",
@@ -50,14 +33,16 @@ const fetcher = async (...args) => {
   const res = await fetch(...args);
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(`Request failed: ${res.status}`);
+    const err = new Error(
+      `Request failed: ${res.status}`
+    );
     err.info = json;
     throw err;
   }
   return json;
 };
 
-export default function RoutesPage(){
+export default function RoutesPage() {
   const { data, error, isLoading } = useSWR(
     "http://localhost:3000/api/routes-locations",
     fetcher,
@@ -82,7 +67,7 @@ export default function RoutesPage(){
   // since it could load before it finishes connecting to the back end, so it wil just default to
   // empty array if it is not an array yet
   let locations = data.info.Locations;
-    console.log(locations);
+  console.log(locations);
 
   return (
     <div>
@@ -92,97 +77,15 @@ export default function RoutesPage(){
   );
 }
 
-
-const PoiMarkers = ({ pois }) => {
-  const map = useMap();
-  const [markers, setMarkers] = useState({});
-  const clusterer = useRef(null);
-  const [circleCenter, setCircleCenter] =
-    useState(null);
-
-  const handleClick = useCallback(
-    (ev) => {
-      if (!map || !ev.latLng) return;
-      console.log(
-        "marker clicked:",
-        ev.latLng.toString()
-      );
-      map.panTo(ev.latLng);
-      setCircleCenter(ev.latLng);
-    },
-    [map]
-  );
-
-  useEffect(() => {
-    if (!map) return;
-    if (!clusterer.current) {
-      clusterer.current = new MarkerClusterer({
-        map,
-      });
-    }
-  }, [map]);
-
-  useEffect(() => {
-    if (clusterer.current) {
-      clusterer.current.clearMarkers();
-      clusterer.current.addMarkers(
-        Object.values(markers)
-      );
-    }
-  }, [markers]);
-
-  const setMarkerRef = (marker, key) => {
-    if (marker && markers[key]) return;
-    if (!marker && !markers[key]) return;
-
-    setMarkers((prev) => {
-      if (marker) {
-        return { ...prev, [key]: marker };
-      } else {
-        const newMarkers = { ...prev };
-        delete newMarkers[key];
-        return newMarkers;
-      }
-    });
-  };
-
-  return (
-    <>
-      <Circle
-        radius={800}
-        center={circleCenter}
-        strokeColor={"#0c4cb3"}
-        strokeOpacity={1}
-        strokeWeight={3}
-        fillColor={"#3b82f6"}
-        fillOpacity={0.3}
-      />
-
-      {pois.map((poi) => (
-        <AdvancedMarker
-          key={poi.key}
-          position={poi.location}
-          ref={(marker) =>
-            setMarkerRef(marker, poi.key)
-          }
-          clickable={true}
-          onClick={handleClick}
-        >
-          <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>
-        </AdvancedMarker>
-      ))}
-    </>
-  );
-};
-
-
-function Menu(){
+// this menu function is for posting the aggregate routes data for each route
+function Menu() {
   const { data, error, isLoading } = useSWR(
     "http://localhost:3000/api/routes-data",
     fetcher,
     { refreshInterval: 1000 } // 3. Configuration: Auto-fetch every 1000ms (1s)
   );
 
+  // error handling
   if (error)
     return (
       <div>
@@ -197,15 +100,15 @@ function Menu(){
       </div>
     );
 
-  // Safely access the inner data 
+  // Safely access the inner data
   // The ?. check prevents crashing if data is null during loading
   const routes = data?.info;
 
   const menuItems = [];
 
+  // This creates menus for each route data and formats it properly
   if (routes && Array.isArray(routes)) {
     for (let i = 0; i < routes.length; i++) {
-
       menuItems.push(
         <StatsMenu
           key={i} // IMPORTANT: React needs a unique 'key' for lists
@@ -222,6 +125,7 @@ function Menu(){
     }
   }
 
+  // puts the aggregate data cards in a row below the map
   return (
     <div className="flex flex-row">
       {menuItems}
