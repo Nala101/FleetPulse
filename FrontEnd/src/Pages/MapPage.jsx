@@ -1,34 +1,11 @@
-/**
- * Copyright 2024 Google LLC
- * Licensed under the Apache License, Version 2.0
- */
+// This is the maps page to show the last average 24hr data for the car and the locational data for the car
 
-// just removed the type script stuff and turned it back into normal js
-// used this example https://github.com/googlemaps-samples/codelab-maps-platform-101-react-js/tree/main
-
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-} from "react";
-
-import {
-  APIProvider,
-  Map,
-  useMap,
-  AdvancedMarker,
-  Pin,
-} from "@vis.gl/react-google-maps";
-
-import { MarkerClusterer } from "@googlemaps/markerclusterer";
-
-import { Circle } from "../Components/circle";
 import StatsMenu from "../Components/StatsMenu";
 import ErrorNotification from "../Components/ErrorNotification";
 import useSWR from "swr";
 import MapWindow from "../Components/MapWindow";
 
+// this is the fetcher for swr to use to query the backend endpoint
 const fetcher = async (...args) => {
   const res = await fetch(...args);
   const json = await res.json().catch(() => ({}));
@@ -43,12 +20,14 @@ const fetcher = async (...args) => {
 };
 
 export default function MapPage() {
+  // fetches data from the backend automatically
   const { data, error, isLoading } = useSWR(
     "http://localhost:3000/api/location-data",
     fetcher,
-    { refreshInterval: 1000 } // 3. Configuration: Auto-fetch every 1000ms (1s)
+    { refreshInterval: 1000 } // Configuration: Auto-fetch every 1000ms (1s)
   );
 
+  // error handling for when it connects to the database
   if (error)
     return (
       <div>
@@ -77,14 +56,14 @@ export default function MapPage() {
 }
 
 function Menu() {
+  // fetches data from the backend automatically
   const { data, error, isLoading } = useSWR(
     "http://localhost:3000/api/car-24-status",
     fetcher,
     { refreshInterval: 1000 } // Configuration: Auto-fetch every 1000ms (1s)
   );
 
-  
-
+  // error handling for when it connects to the database
   if (error)
     return (
       <div>
@@ -98,9 +77,6 @@ function Menu() {
         <ErrorNotification message="loading dashboard" />
       </div>
     );
-
-  
-
 
   return (
     <div>
