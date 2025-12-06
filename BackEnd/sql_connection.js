@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 
-
+// the config files for the database 
 const config = {
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
@@ -24,17 +24,12 @@ const config = {
   },
 };
 
-
+// connections for the db
 const pool = new sql.ConnectionPool(config);
 const poolConnect = pool.connect();
 
 
-// todo:
-// barfield add the functions we need here for the querries and stuff
-// this one will just get the first values in the db, but add the queries for
-// like getting the location data in the last 24 hr or like
-// the average data, if you want we can do the avg data calc in the backend instead of the query
-
+// query for getting the live stats of the car, returns the results as 
 export async function carStatus(row_num) {
   try {
     // ensure connected before querying
@@ -54,6 +49,7 @@ export async function carStatus(row_num) {
   }
 }
 
+// query to get the 24hr locational dataa from the db, returns the results as a json
 export async function getLocationData() {
   try {
     // ensure connected before querying
@@ -71,6 +67,7 @@ export async function getLocationData() {
   }
 }
 
+// query to get the average data for the car over the last 24 hours, returns the results as a json
 export async function get24HourAverages() {
   try {
     await poolConnect;
@@ -95,7 +92,7 @@ export async function get24HourAverages() {
 }
 
 
-
+// query to get the average route data over the last 24 hours for the different routes the car took, returns the results as an array
 export async function getRouteData() {
   try {
     await poolConnect;
@@ -147,6 +144,7 @@ ORDER BY StartTime
   }
 }
 
+// query to get the route location data over the last 24 hours for the different routes the car took, returns the results as an array
 export async function getRouteLocations() {
   try {
     await poolConnect;

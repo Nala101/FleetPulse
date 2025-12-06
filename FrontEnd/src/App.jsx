@@ -1,4 +1,4 @@
-import React from 'react'
+
 import "./App.css";
 import NavBar from './Components/NavBar.jsx'
 import Dashboard from "./Pages/Dashboard.jsx";
@@ -7,7 +7,7 @@ import MainPage from './Pages/MainPage.jsx';
 import { Routes, Route } from 'react-router-dom';
 import RoutesPage from './Pages/RoutesPage.jsx';
 
-
+// Creates the base react application and defines the router so it can load the pages dynamically 
 export default function App() {
   return (
     <div className="bg-white-100">

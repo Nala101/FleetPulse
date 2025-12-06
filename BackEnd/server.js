@@ -27,7 +27,8 @@ app.get("/", (req, res) => {
 });
 
 // API Route (GET): Fetch latest car status
-// gets the current status of the car
+// gets the current status of the car and returns the data as a json
+// data is nested under the key "info"
 app.get("/api/car-status", async (req, res) => {
   //for debuging if the server cant be reached will send placeholder data
   if (DEBUG) {
@@ -75,7 +76,8 @@ app.get("/api/car-status", async (req, res) => {
 });
 
 // API Route (GET): Fetch
-// get the average stats of the car over the last 24 hours
+// get the average stats of the car over the last 24 hours, returns the data as a json
+// data is nested under the key "info"
 app.get(
   "/api/car-24-status",
   async (req, res) => {
@@ -107,13 +109,11 @@ app.get(
         });
       }
 
-
-
+      // since stats menu needs time as well, just puts these as place holder
       data.StartTime = "T0:00";
       data.EndTime = "T23:59";
 
       console.log("server data: ", data);
-
 
       res.json({
         info: data,
@@ -134,12 +134,14 @@ app.get(
 
 // API Route (GET): Fetch data
 // gets the location data over the last 24 hours from the car as coordinates
+// data is nested under the key "info"
+
 app.get(
   "/api/location-data",
   async (req, res) => {
     //for debuging if the server cant be reached will send placeholder data
     if (DEBUG) {
-      // Plain JS array of POIs
+      // Plain JS array of POIs used as default values, taken from the google maps api example code
       const locations = [
         {
           key: "botanicGardens",
@@ -185,9 +187,10 @@ app.get(
 
       console.log("server data: ", data);
 
-      // Transform DB rows to the shape MapPage expects: { key, location: { lat, lng } }
+      // Transform DB rows to the shape the google map api expects: { key, location: { lat, lng } }
       const locations = [];
 
+      // iterates through each row formating them
       for (const row of data) {
         // Extract the numbers
         const lat = Number(row.Latitude);
@@ -225,12 +228,14 @@ app.get(
 // API Route (GET): Fetch data
 // gets the locational data for the routes that the car took, it counts a route as stopping
 // for atleast 15min and then driving again, will return coordinate data for it
+// data is nested under the key "info"
+
 app.get(
   "/api/routes-locations",
   async (req, res) => {
     //for debuging if the server cant be reached will send placeholder data
     if (DEBUG) {
-      // Plain JS array of POIs
+      // Plain JS array of POIs taken from the google maps api example as place holder data
       const locations = [
         {
           key: "botanicGardens",
@@ -272,15 +277,16 @@ app.get(
 
       // error handling
       if (!data) {
-        
         return res.status(500).json({
           error: "Database error: No Data Found",
         });
       }
 
-      // Transform DB rows to the shape MapPage expects: { key, location: { lat, lng } }
+      // Transform DB rows to the shape google maps api expects: { key, location: { lat, lng } }
       const locations = [];
       let i = 1;
+
+      // iterates through the rows and formats the data
       for (const row of data) {
         // Extract the numbers
         const lat = Number(row.Latitude);
@@ -300,8 +306,6 @@ app.get(
         i++;
       }
       
-      console.log(locations);
-
       return res.json({
         info: { Locations: locations },
         timestamp: new Date(),
@@ -318,6 +322,8 @@ app.get(
 // API Route (GET): Fetch
 // gets the average data for each route that the car took, each route data has a
 // key called PeriodGroup that defines which route it is in the day.
+// data is nested under the key "info"
+
 app.get("/api/routes-data", async (req, res) => {
   //for debuging if the server cant be reached will send placeholder data
   if (DEBUG) {
@@ -339,8 +345,6 @@ app.get("/api/routes-data", async (req, res) => {
 
     const data = await getRouteData();
 
-
-
     // error handling
     if (!data) {
       return res.status(500).json({
@@ -360,11 +364,13 @@ app.get("/api/routes-data", async (req, res) => {
   }
 });
 
+// middleware for catching errors 
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send("Error");
 });
 
+// starts the server listener
 app.listen(PORT, () => {
   console.log(
     `---------------------------------------`
