@@ -214,7 +214,7 @@ function Menu(){
             "Route " +
             routes[i].PeriodGroup +
             " (" +
-            (GROUP_COLORS[i] || "blue") +
+            (GROUP_COLORS[i + 1]) +
             ")"
           }
         />

@@ -28,13 +28,6 @@ const config = {
 const pool = new sql.ConnectionPool(config);
 const poolConnect = pool.connect();
 
-
-// todo:
-// barfield add the functions we need here for the querries and stuff
-// this one will just get the first values in the db, but add the queries for
-// like getting the location data in the last 24 hr or like
-// the average data, if you want we can do the avg data calc in the backend instead of the query
-
 export async function carStatus(row_num) {
   try {
     // ensure connected before querying
