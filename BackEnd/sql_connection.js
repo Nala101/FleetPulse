@@ -59,9 +59,10 @@ export async function getLocationData() {
     // ensure connected before querying
     await poolConnect;
     const result = await pool.request().query(`
-      SELECT MsgID, UploadTime, Latitude, Longitude, Mph
-      FROM Msg
-      ORDER BY UploadTime DESC
+      SELECT msg.MsgID, msg.UploadTime, msg.Latitude, msg.Longitude, msg.Mph
+      FROM dbo.Msg as msg
+      WHERE msg.UploadTime > DATEADD(HOUR, -24, GETDATE())
+      ORDER BY msg.UploadTime DESC
     `);
 
     return result.recordset; // array of objects (rows)
@@ -75,7 +76,7 @@ export async function get24HourAverages() {
   try {
     await poolConnect;
     const result = await pool.request().query(`
-           SELECT
+      SELECT
       MAX(msg.mph) as 'TopSpeed',
       AVG(msg.mph) as 'AvgSpeed',
       AVG(msg.CabinTemperature) as 'AvgCabinTemp',
@@ -84,7 +85,7 @@ export async function get24HourAverages() {
       SUM(msg.MilesTraveled) as 'TtlMilesTraveled',
       SUM(msg.MilesTraveled)/SUM(msg.GalUsed) as 'AvgMPG'
       FROM dbo.Msg as msg
-      WHERE msg.UploadTime > DATEADD(HOUR, -120, GETDATE())
+      WHERE msg.UploadTime > DATEADD(HOUR, -24, GETDATE())
     `);
 
     return result.recordset[0];
@@ -100,44 +101,44 @@ export async function getRouteData() {
   try {
     await poolConnect;
     const result = await pool.request().query(`
-     WITH Recent AS (
-    SELECT *
-    FROM Msg
-    WHERE UploadTime >= DATEADD(HOUR, -120, GETDATE())
-),
-TravelPeriodFlags AS (
-    SELECT
-        *,
-        CASE 
-            WHEN LAG(UploadTime) OVER (ORDER BY UploadTime) IS NULL THEN 1
-            WHEN DATEDIFF(MINUTE,
-                LAG(UploadTime) OVER (ORDER BY UploadTime),
-                UploadTime) >= 15 THEN 1
-            ELSE 0
-        END AS TravelPeriodStart
-    FROM Recent
-),
-Groups AS (
-    SELECT 
-        *,
-        SUM(TravelPeriodStart) OVER (ORDER BY UploadTime
-                                     ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PeriodGroup
-    FROM TravelPeriodFlags
-)
-SELECT 
-    Groups.PeriodGroup,
-    MIN(Groups.UploadTime) as 'StartTime',
-    MAX(Groups.UploadTime) as 'EndTime',
-    MAX(Groups.Mph) as 'TopSpeed',
-    AVG(Groups.Mph) as 'AvgSpeed',
-    AVG(Groups.CabinTemperature) as 'AvgCabinTemp',
-    AVG(Groups.CabinHumidity) as 'AvgCabinHumidity',
-    AVG(Groups.EngineTemp) as 'AvgEngineTemp',
-    SUM(Groups.MilesTraveled) as 'TtlMilesTraveled',
-    SUM(Groups.MilesTraveled)/SUM(Groups.GalUsed) as 'AvgMPG'
-FROM Groups
-GROUP BY Groups.PeriodGroup
-ORDER BY StartTime
+      WITH Recent AS (
+        SELECT *
+        FROM Msg
+        WHERE UploadTime >= DATEADD(HOUR, -24, GETDATE())
+      ),
+      TravelPeriodFlags AS (
+          SELECT
+              *,
+              CASE 
+                  WHEN LAG(UploadTime) OVER (ORDER BY UploadTime) IS NULL THEN 1
+                  WHEN DATEDIFF(MINUTE,
+                      LAG(UploadTime) OVER (ORDER BY UploadTime),
+                      UploadTime) >= 15 THEN 1
+                  ELSE 0
+              END AS TravelPeriodStart
+          FROM Recent
+      ),
+      Groups AS (
+          SELECT 
+              *,
+              SUM(TravelPeriodStart) OVER (ORDER BY UploadTime
+                                          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PeriodGroup
+          FROM TravelPeriodFlags
+      )
+      SELECT 
+          Groups.PeriodGroup,
+          MIN(Groups.UploadTime) as 'StartTime',
+          MAX(Groups.UploadTime) as 'EndTime',
+          MAX(Groups.Mph) as 'TopSpeed',
+          AVG(Groups.Mph) as 'AvgSpeed',
+          AVG(Groups.CabinTemperature) as 'AvgCabinTemp',
+          AVG(Groups.CabinHumidity) as 'AvgCabinHumidity',
+          AVG(Groups.EngineTemp) as 'AvgEngineTemp',
+          SUM(Groups.MilesTraveled) as 'TtlMilesTraveled',
+          SUM(Groups.MilesTraveled)/SUM(Groups.GalUsed) as 'AvgMPG'
+      FROM Groups
+      GROUP BY Groups.PeriodGroup
+      ORDER BY StartTime
     `);
 
     return result.recordset;
@@ -151,36 +152,38 @@ export async function getRouteLocations() {
   try {
     await poolConnect;
     const result = await pool.request()
-      .query(`WITH Recent AS (
-    SELECT *
-    FROM Msg
-    WHERE UploadTime >= DATEADD(HOUR, -120, GETDATE())
-),
-TravelPeriodFlags AS (
-    SELECT
-        *,
-        CASE 
-            WHEN LAG(UploadTime) OVER (ORDER BY UploadTime) IS NULL THEN 1
-            WHEN DATEDIFF(MINUTE,
-                LAG(UploadTime) OVER (ORDER BY UploadTime),
-                UploadTime) >= 15 THEN 1
-            ELSE 0
-        END AS TravelPeriodStart
-    FROM Recent
-),
-Groups AS (
-    SELECT 
-        *,
-        SUM(TravelPeriodStart) OVER (ORDER BY UploadTime
-                                     ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PeriodGroup
-    FROM TravelPeriodFlags
-)
-SELECT 
-    Groups.PeriodGroup,
-    Groups.Latitude,
-    Groups.Longitude
-FROM Groups
-ORDER BY Groups.UploadTime`);
+      .query(`
+        WITH Recent AS (
+          SELECT *
+          FROM Msg
+          WHERE UploadTime >= DATEADD(HOUR, -24, GETDATE())
+        ),
+        TravelPeriodFlags AS (
+            SELECT
+                *,
+                CASE 
+                    WHEN LAG(UploadTime) OVER (ORDER BY UploadTime) IS NULL THEN 1
+                    WHEN DATEDIFF(MINUTE,
+                        LAG(UploadTime) OVER (ORDER BY UploadTime),
+                        UploadTime) >= 15 THEN 1
+                    ELSE 0
+                END AS TravelPeriodStart
+            FROM Recent
+        ),
+        Groups AS (
+            SELECT 
+                *,
+                SUM(TravelPeriodStart) OVER (ORDER BY UploadTime
+                                            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS PeriodGroup
+            FROM TravelPeriodFlags
+        )
+        SELECT 
+            Groups.PeriodGroup,
+            Groups.Latitude,
+            Groups.Longitude
+        FROM Groups
+        ORDER BY Groups.UploadTime
+      `);
 
     return result.recordset;
   } catch (err) {
