@@ -1,5 +1,3 @@
-// This is the dashboard page to display the live data from the car
-
 import InfoCard from "../Components/InfoCard";
 import ErrorNotification from "../Components/ErrorNotification";
 import useSWR from "swr";
@@ -19,10 +17,9 @@ const fetcher = async (...args) => {
   return json;
 };
 
-// creates the dashboard page for the website, and queries the backend for the car status information
+// creates the dashboard page for the website to display the car stats, and queries the backend for the car status information
 // and populates the coresponding infoCards and MapCards with the information
 export default function Dashboard() {
-  
   // fetches data from the backend automatically
   const { data, error, isLoading } = useSWR(
     "http://localhost:3000/api/car-status",

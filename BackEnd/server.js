@@ -1,6 +1,3 @@
-/**
- * server.js - The main entry point for your Node.js Backend
- */
 import express from "express";
 import cors from "cors";
 
@@ -26,7 +23,7 @@ app.get("/", (req, res) => {
   res.send("Connected");
 });
 
-// API Route (GET): Fetch latest car status
+
 // gets the current status of the car and returns the data as a json
 // data is nested under the key "info"
 app.get("/api/car-status", async (req, res) => {
@@ -55,7 +52,7 @@ app.get("/api/car-status", async (req, res) => {
   });
 });
 
-// API Route (GET): Fetch
+
 // get the average stats of the car over the last 24 hours, returns the data as a json
 // data is nested under the key "info"
 app.get(
@@ -87,7 +84,7 @@ app.get(
   }
 );
 
-// API Route (GET): Fetch data
+
 // gets the location data over the last 24 hours from the car as coordinates
 // data is nested under the key "info"
 
@@ -138,7 +135,7 @@ app.get(
 }
 );
 
-// API Route (GET): Fetch data
+
 // gets the locational data for the routes that the car took, it counts a route as stopping
 // for atleast 15min and then driving again, will return coordinate data for it
 // data is nested under the key "info"
@@ -189,7 +186,7 @@ app.get(
   }
 );
 
-// API Route (GET): Fetch
+
 // gets the average data for each route that the car took, each route data has a
 // key called PeriodGroup that defines which route it is in the day.
 // data is nested under the key "info"

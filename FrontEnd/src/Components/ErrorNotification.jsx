@@ -1,5 +1,3 @@
-import React from "react";
-
 // an error messsage card that can show up when there is an error, will diplay on the top right corner fo the screen
 export default function ErrorNotification({
   message,
