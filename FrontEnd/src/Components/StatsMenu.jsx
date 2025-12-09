@@ -1,21 +1,5 @@
-
-/*
-Here is the sql query for reference 
-SELECT
-      MAX(msg.mph) as 'TopSpeed',
-      AVG(msg.mph) as 'AvgSpeed',
-      AVG(msg.CabinTemperature) as 'AvgCabinTemp',
-      AVG(msg.CabinHumidity) as 'AvgCabinHumidity',
-      AVG(msg.EngineTemp) as 'AvgEngineTemp',
-      SUM(msg.MilesTraveled) as 'TtlMilesTraveled',
-      SUM(msg.MilesTraveled)/SUM(msg.GalUsed) as 'AvgMPG'
-      FROM dbo.Msg as msg
-      WHERE msg.UploadTime > DATEADD(HOUR, -96, GETDATE())
-
-*/
-
 // this creates a new card for the average stats for the car data
-// bascially just intakes the title and json for the data given to 
+// bascially just intakes the title and json for the data given to
 // the function and shows it
 export default function StatsMenu({
   data,
@@ -23,7 +7,7 @@ export default function StatsMenu({
 }) {
   const stats = data;
 
-  // this splits up the time data so it is formated nicely 
+  // this splits up the time data so it is formated nicely
   const startTime =
     stats.StartTime.split("T")[0] +
     ": " +
@@ -53,8 +37,8 @@ export default function StatsMenu({
             F
           </div>
           <div>
-            AVG Engine Temps: {stats.AvgEngineTemp}{" "}
-            F
+            AVG Engine Temps:{" "}
+            {stats.AvgEngineTemp} F
           </div>
           <div>
             Total Miles Traveled:{" "}

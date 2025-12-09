@@ -1,6 +1,4 @@
-import React from "react";
 import { Link } from "react-router-dom";
-
 
 // nav bar for the webite to navigate to difference web pages
 export default function NavBar() {

@@ -1,5 +1,3 @@
-// This is the maps page to show the last average 24hr data for the car and the locational data for the car
-
 import StatsMenu from "../Components/StatsMenu";
 import ErrorNotification from "../Components/ErrorNotification";
 import useSWR from "swr";
@@ -19,6 +17,8 @@ const fetcher = async (...args) => {
   return json;
 };
 
+// This is the function that will make the map page that shows the map of the last
+// 24 hours of the vehicle on a google maps using Google API with MapWindow
 export default function MapPage() {
   // fetches data from the backend automatically
   const { data, error, isLoading } = useSWR(
@@ -55,6 +55,8 @@ export default function MapPage() {
   );
 }
 
+// this is for the stats menu that shows the average 24 hr stats of the vehicle
+// put below the map
 function Menu() {
   // fetches data from the backend automatically
   const { data, error, isLoading } = useSWR(

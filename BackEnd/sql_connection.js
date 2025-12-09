@@ -2,14 +2,13 @@ import sql from "mssql";
 import dotenv from "dotenv";
 dotenv.config();
 
-
-// the config files for the database 
+// the config files for the database
 const config = {
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   port: Number(process.env.DB_PORT),
-  server: process.env.DB_SERVER, // e.g. "myserver.database.windows.net"
+  server: process.env.DB_SERVER,
   pool: {
     max: 10,
     min: 0,
@@ -20,7 +19,7 @@ const config = {
   },
   options: {
     encrypt: true, // required for Azure
-    trustServerCertificate: false, // true only for local dev
+    trustServerCertificate: false,
   },
 };
 
@@ -28,21 +27,18 @@ const config = {
 const pool = new sql.ConnectionPool(config);
 const poolConnect = pool.connect();
 
-
-// query for getting the live stats of the car, returns the results as 
+// query for getting the live stats of the car, returns the results as
 export async function carStatus(row_num) {
   try {
     // ensure connected before querying
     await poolConnect;
-    const result = await pool
-      .request()
-      .query(`
+    const result = await pool.request().query(`
       SELECT TOP 1 *
       FROM dbo.Msg as msg
       ORDER BY msg.UploadTime DESC
     `);
 
-    return result.recordset[0]; // array of objects (rows)
+    return result.recordset[0];
   } catch (err) {
     console.error("DB ERROR:", err);
     return null;
@@ -61,7 +57,7 @@ export async function getLocationData() {
       ORDER BY msg.UploadTime DESC
     `);
 
-    return result.recordset; // array of objects (rows)
+    return result.recordset;
   } catch (err) {
     console.error("DB ERROR:", err);
     return null;
@@ -92,8 +88,8 @@ export async function get24HourAverages() {
   }
 }
 
-
-// query to get the average route data over the last 24 hours for the different routes the car took, returns the results as an array
+// query to get the average route data over the last 24 hours for the
+// different routes the car took, returns the results as an array
 export async function getRouteData() {
   try {
     await poolConnect;
@@ -145,7 +141,8 @@ export async function getRouteData() {
   }
 }
 
-// query to get the route location data over the last 24 hours for the different routes the car took, returns the results as an array
+// query to get the route location data over the last 24
+// hours for the different routes the car took, returns the results as an array
 export async function getRouteLocations() {
   try {
     await poolConnect;

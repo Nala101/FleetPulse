@@ -1,4 +1,3 @@
-
 /**
  * Copyright 2024 Google LLC
  * Licensed under the Apache License, Version 2.0
@@ -7,7 +6,6 @@
 // most of this code was taken from the example code from google to use their api
 // just removed the type script stuff and turned it back into normal js
 // used this example https://github.com/googlemaps-samples/codelab-maps-platform-101-react-js/tree/main
-
 
 import React, {
   useEffect,
@@ -39,7 +37,7 @@ const GROUP_COLORS = {
   10: "bg-rose-500",
 };
 
-// creates the map from the google maps api, this code was taken from the example code 
+// creates the map from the google maps api, this code was taken from the example code
 // from the google maps api github example
 export default function MapWindow({ locations }) {
   return (
@@ -84,7 +82,7 @@ export default function MapWindow({ locations }) {
   );
 }
 
-// creates the markers for the map, code was taken from google 
+// creates the markers for the map, code was taken from google
 const PoiMarkers = ({ pois }) => {
   const map = useMap();
   const [markers, setMarkers] = useState({});
@@ -151,10 +149,11 @@ const PoiMarkers = ({ pois }) => {
       />
 
       {pois.map((poi) => {
-
         // this part will color the marker based on the route it is
-        const colorClass = GROUP_COLORS[poi.PeriodGroup] || "bg-blue-500";
-        
+        const colorClass =
+          GROUP_COLORS[poi.PeriodGroup] ||
+          "bg-blue-500";
+
         return (
           <AdvancedMarker
             key={poi.key}
@@ -169,7 +168,8 @@ const PoiMarkers = ({ pois }) => {
               className={`w-4 h-4 rounded-full border-2 border-white shadow-sm ${colorClass}`}
             ></div>
           </AdvancedMarker>
-        );})}
+        );
+      })}
     </>
   );
 };

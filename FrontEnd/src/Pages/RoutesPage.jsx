@@ -1,16 +1,3 @@
-/**
- * Copyright 2024 Google LLC
- * Licensed under the Apache License, Version 2.0
- */
-
-// just removed the type script stuff and turned it back into normal js
-// used this example https://github.com/googlemaps-samples/codelab-maps-platform-101-react-js/tree/main
-
-// this page is for the routes data so the user can visualize the differnet routes they took
-// currently a route is defined as having a 15min gap of being idle between drives
-// this page has a map with color coded routes as well as aggregate stats about each route
-// in a card below the map
-
 import StatsMenu from "../Components/StatsMenu";
 import ErrorNotification from "../Components/ErrorNotification";
 import useSWR from "swr";
@@ -73,7 +60,6 @@ export default function RoutesPage() {
   // since it could load before it finishes connecting to the back end, so it wil just default to
   // empty array if it is not an array yet
   let locations = data.info;
-  console.log(locations);
 
   return (
     <div>
@@ -83,7 +69,7 @@ export default function RoutesPage() {
   );
 }
 
-// this menu function is for posting the aggregate routes data for each route
+// this menu function is for posting the average vehicle stats and routes data for each route
 function Menu() {
   const { data, error, isLoading } = useSWR(
     "http://localhost:3000/api/routes-data",
@@ -117,7 +103,7 @@ function Menu() {
     for (let i = 0; i < routes.length; i++) {
       menuItems.push(
         <StatsMenu
-          key={i} // IMPORTANT: React needs a unique 'key' for lists
+          key={i} // React needs a unique 'key' for lists
           data={routes[i]}
           title={
             "Route " +
