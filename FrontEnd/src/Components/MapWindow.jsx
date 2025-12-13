@@ -1,13 +1,11 @@
-
 /**
  * Copyright 2024 Google LLC
  * Licensed under the Apache License, Version 2.0
  */
 
-
+// most of this code was taken from the example code from google to use their api
 // just removed the type script stuff and turned it back into normal js
 // used this example https://github.com/googlemaps-samples/codelab-maps-platform-101-react-js/tree/main
-
 
 import React, {
   useEffect,
@@ -15,7 +13,6 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-
 import {
   APIProvider,
   Map,
@@ -23,11 +20,10 @@ import {
   AdvancedMarker,
   Pin,
 } from "@vis.gl/react-google-maps";
-
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
-
 import { Circle } from "../Components/circle";
 
+// colors for the map markers, this is used for the different routes
 const GROUP_COLORS = {
   1: "bg-pink-500",
   2: "bg-red-500",
@@ -41,6 +37,8 @@ const GROUP_COLORS = {
   10: "bg-rose-500",
 };
 
+// creates the map from the google maps api, this code was taken from the example code
+// from the google maps api github example
 export default function MapWindow({ locations }) {
   return (
     <div className="flex flex-row">
@@ -84,6 +82,7 @@ export default function MapWindow({ locations }) {
   );
 }
 
+// creates the markers for the map, code was taken from google
 const PoiMarkers = ({ pois }) => {
   const map = useMap();
   const [markers, setMarkers] = useState({});
@@ -150,8 +149,11 @@ const PoiMarkers = ({ pois }) => {
       />
 
       {pois.map((poi) => {
-        const colorClass = GROUP_COLORS[poi.PeriodGroup] || "bg-blue-500";
-        
+        // this part will color the marker based on the route it is
+        const colorClass =
+          GROUP_COLORS[poi.PeriodGroup] ||
+          "bg-blue-500";
+
         return (
           <AdvancedMarker
             key={poi.key}
@@ -166,7 +168,8 @@ const PoiMarkers = ({ pois }) => {
               className={`w-4 h-4 rounded-full border-2 border-white shadow-sm ${colorClass}`}
             ></div>
           </AdvancedMarker>
-        );})}
+        );
+      })}
     </>
   );
 };

@@ -1,30 +1,33 @@
-import React from "react";
 import InfoCard from "../Components/InfoCard";
 import ErrorNotification from "../Components/ErrorNotification";
 import useSWR from "swr";
-import StatsMenu from "../Components/StatsMenu";
 import MapCard from "../Components/MapCard";
 
-
+// this is the fetcher for swr to use to query the backend endpoint
 const fetcher = async (...args) => {
   const res = await fetch(...args);
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(`Request failed: ${res.status}`);
+    const err = new Error(
+      `Request failed: ${res.status}`
+    );
     err.info = json;
     throw err;
   }
   return json;
 };
 
+// creates the dashboard page for the website to display the car stats, and queries the backend for the car status information
+// and populates the coresponding infoCards and MapCards with the information
 export default function Dashboard() {
+  // fetches data from the backend automatically
   const { data, error, isLoading } = useSWR(
     "http://localhost:3000/api/car-status",
     fetcher,
-    { refreshInterval: 1000 } // 3. Configuration: Auto-fetch every 1000ms (1s)
+    { refreshInterval: 1000 } // Configuration: Auto-fetch every 1000ms (1s)
   );
 
-  // error hadning for when it connects to the database 
+  // error handling for when it connects to the database
   if (error)
     return (
       <div>
@@ -39,6 +42,7 @@ export default function Dashboard() {
       </div>
     );
 
+  // formats the location coords into the proper format for google maps api
   const stats = data.info;
   const locations = [
     {
@@ -49,6 +53,8 @@ export default function Dashboard() {
       },
     },
   ];
+
+  // creates the dashboard part for the website to display all the live vehicle stats
   return (
     <div className="flex flex-col">
       <div className="flex flex-row">
@@ -73,7 +79,6 @@ export default function Dashboard() {
           />
         </div>
       </div>
-
       <div>
         <MapCard location={locations} />
       </div>

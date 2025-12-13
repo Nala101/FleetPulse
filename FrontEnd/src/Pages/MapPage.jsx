@@ -1,34 +1,9 @@
-/**
- * Copyright 2024 Google LLC
- * Licensed under the Apache License, Version 2.0
- */
-
-// just removed the type script stuff and turned it back into normal js
-// used this example https://github.com/googlemaps-samples/codelab-maps-platform-101-react-js/tree/main
-
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-} from "react";
-
-import {
-  APIProvider,
-  Map,
-  useMap,
-  AdvancedMarker,
-  Pin,
-} from "@vis.gl/react-google-maps";
-
-import { MarkerClusterer } from "@googlemaps/markerclusterer";
-
-import { Circle } from "../Components/circle";
 import StatsMenu from "../Components/StatsMenu";
 import ErrorNotification from "../Components/ErrorNotification";
 import useSWR from "swr";
 import MapWindow from "../Components/MapWindow";
 
+// this is the fetcher for swr to use to query the backend endpoint
 const fetcher = async (...args) => {
   const res = await fetch(...args);
   const json = await res.json().catch(() => ({}));
@@ -42,13 +17,17 @@ const fetcher = async (...args) => {
   return json;
 };
 
+// This is the function that will make the map page that shows the map of the last
+// 24 hours of the vehicle on a google maps using Google API with MapWindow
 export default function MapPage() {
+  // fetches data from the backend automatically
   const { data, error, isLoading } = useSWR(
     "http://localhost:3000/api/location-data",
     fetcher,
-    { refreshInterval: 1000 } // 3. Configuration: Auto-fetch every 1000ms (1s)
+    { refreshInterval: 1000 } // Configuration: Auto-fetch every 1000ms (1s)
   );
 
+  // error handling for when it connects to the database
   if (error)
     return (
       <div>
@@ -66,7 +45,7 @@ export default function MapPage() {
   // make sure locations is an array cuz if not it will break the google maps,
   // since it could load before it finishes connecting to the back end, so it wil just default to
   // empty array if it is not an array yet
-  let locations = data.info.Locations;
+  let locations = data.info;
 
   return (
     <div>
@@ -76,15 +55,17 @@ export default function MapPage() {
   );
 }
 
+// this is for the stats menu that shows the average 24 hr stats of the vehicle
+// put below the map
 function Menu() {
+  // fetches data from the backend automatically
   const { data, error, isLoading } = useSWR(
     "http://localhost:3000/api/car-24-status",
     fetcher,
     { refreshInterval: 1000 } // Configuration: Auto-fetch every 1000ms (1s)
   );
 
-  
-
+  // error handling for when it connects to the database
   if (error)
     return (
       <div>
@@ -98,9 +79,6 @@ function Menu() {
         <ErrorNotification message="loading dashboard" />
       </div>
     );
-
-  
-
 
   return (
     <div>

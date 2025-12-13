@@ -1,10 +1,9 @@
-import React from "react";
-
+// an error messsage card that can show up when there is an error, will diplay on the top right corner fo the screen
 export default function ErrorNotification({
   message,
 }) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4">
+    <div className="fixed top-4 right-4 p-4 z-50">
       <div className="bg-yellow-200 text-yellow-900 border border-yellow-400 rounded-lg shadow-lg px-6 py-4">
         {message}
       </div>
