@@ -3,7 +3,9 @@ import ErrorNotification from "../Components/ErrorNotification";
 import useSWR from "swr";
 import MapWindow from "../Components/MapWindow";
 
+
 // this is the fetcher for swr to use to query the backend endpoint
+// this was from chatgpt
 const fetcher = async (...args) => {
   const res = await fetch(...args);
   const json = await res.json().catch(() => ({}));

@@ -4,6 +4,7 @@ import useSWR from "swr";
 import MapCard from "../Components/MapCard";
 
 // this is the fetcher for swr to use to query the backend endpoint
+// this was from chatgpt
 const fetcher = async (...args) => {
   const res = await fetch(...args);
   const json = await res.json().catch(() => ({}));
