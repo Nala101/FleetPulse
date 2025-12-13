@@ -4,7 +4,7 @@
  */
 
 // most of this code was taken from the example code from google to use their api
-// just removed the type script stuff and turned it back into normal js
+// just removed the type script stuff and turned it back into normal js using ChatGPT
 // used this example https://github.com/googlemaps-samples/codelab-maps-platform-101-react-js/tree/main
 
 import React, {

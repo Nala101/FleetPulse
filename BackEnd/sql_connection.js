@@ -79,7 +79,7 @@ export async function get24HourAverages() {
       SUM(msg.MilesTraveled)/SUM(msg.GalUsed) as 'AvgMPG'
       FROM dbo.Msg as msg
       WHERE msg.UploadTime > DATEADD(HOUR, -24, GETDATE())
-      WHERE msg.UploadTime > DATEADD(HOUR, -24, GETDATE())
+
     `);
 
     return result.recordset[0];
